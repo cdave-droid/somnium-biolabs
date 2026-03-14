@@ -39,3 +39,16 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+*.egg-info/
+
+# ai-doctor
+ai-doctor/data/*.json
+ai-doctor/data/*.parquet
+ai-doctor/results/*.json
+ai-doctor/results/*.csv

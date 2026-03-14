@@ -1,0 +1,23 @@
+[project]
+name = "ai-doctor"
+version = "0.1.0"
+description = "Multi-agent AI doctor system with organ-system specialist agents for clinical reasoning"
+requires-python = ">=3.11"
+dependencies = [
+    "anthropic>=0.40.0",
+    "datasets>=3.0.0",
+    "pandas>=2.0.0",
+    "tabulate>=0.9.0",
+    "tqdm>=4.66.0",
+    "tenacity>=8.2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+]
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.backends._legacy:_Backend"
