@@ -1,0 +1,30 @@
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+
+# Packaging artifacts
+*.egg-info/
+dist/
+build/
+
+# Test cache
+.pytest_cache/
+
+# Downloaded datasets (keep .gitkeep)
+data/*.json
+data/*.parquet
+data/*.arrow
+data/**/*.arrow
+data/**/*.json
+
+# Benchmark outputs (keep .gitkeep)
+results/*.json
+results/*.csv
+
+# Environment variables
+.env
