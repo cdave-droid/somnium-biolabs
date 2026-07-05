@@ -10,6 +10,10 @@ Built from the SENTINEL Technical Specification. Start here:
 
 - **`DECISIONS.md`** — every convention the spec left open, pinned (both
   runtimes depend on it byte-for-byte).
+- **`INTEGRATION.md`** — how the engine is wired into the Next.js app
+  (`/sentinel` demo page + `/api/sentinel/evaluate`), the durability pieces
+  (audit sink, baseline store, silent-unit watchdog), and the designed
+  persistence schema.
 - **`GAPS.md`** — issues found in the spec: what this build resolved, what
   needs your/SME decisions, and deliberate deviations. **Read section B before
   planning any deployment.**
