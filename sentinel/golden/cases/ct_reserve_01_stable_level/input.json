@@ -1,0 +1,79 @@
+{
+  "unit_profile": {
+    "unit_id": "u-001",
+    "service_age_years": 72,
+    "class": "M",
+    "mass_kg": 82,
+    "known_conditions": [],
+    "active_mitigations": [],
+    "baselines": {
+      "cycle_rate": {
+        "median": 68,
+        "p10": 60,
+        "p90": 78,
+        "window_days": 14,
+        "n_obs": 41
+      },
+      "pressure_primary": {
+        "median": 128,
+        "p10": 115,
+        "p90": 142,
+        "window_days": 14,
+        "n_obs": 30
+      }
+    }
+  },
+  "observations": [
+    {
+      "obs_id": "o000",
+      "unit_id": "u-001",
+      "timestamp": "2026-07-03T02:00:00Z",
+      "type": "reserve_level",
+      "source": "inline_gauge",
+      "value": 28
+    },
+    {
+      "obs_id": "o001",
+      "unit_id": "u-001",
+      "timestamp": "2026-07-03T05:00:00Z",
+      "type": "reserve_level",
+      "source": "inline_gauge",
+      "value": 29
+    },
+    {
+      "obs_id": "o002",
+      "unit_id": "u-001",
+      "timestamp": "2026-07-03T08:00:00Z",
+      "type": "reserve_level",
+      "source": "inline_gauge",
+      "value": 28
+    },
+    {
+      "obs_id": "o003",
+      "unit_id": "u-001",
+      "timestamp": "2026-07-03T11:00:00Z",
+      "type": "reserve_level",
+      "source": "inline_gauge",
+      "value": 29
+    },
+    {
+      "obs_id": "o004",
+      "unit_id": "u-001",
+      "timestamp": "2026-07-03T13:00:00Z",
+      "type": "reserve_level",
+      "source": "inline_gauge",
+      "value": 28
+    }
+  ],
+  "context": {
+    "deployment": "field_expedition",
+    "operator_skill": "basic",
+    "time_to_service_min": {
+      "self_service": 60,
+      "on_site": 240,
+      "recovery": 2880
+    },
+    "connectivity": "offline"
+  },
+  "reference_time": null
+}

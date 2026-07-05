@@ -1,0 +1,17 @@
+{
+  "content_type": "operational_bounds",
+  "bounds": {
+    "cycle_rate": { "min": 20, "max": 300 },
+    "flow_rate": { "min": 0, "max": 120 },
+    "saturation_pct": { "min": 0, "max": 100 },
+    "pressure_primary": { "min": 20, "max": 320 },
+    "pressure_secondary": { "min": 10, "max": 220 },
+    "temperature_c": { "min": 20, "max": 45 },
+    "strain_0_10": { "min": 0, "max": 10 },
+    "mass_kg": { "min": 0.2, "max": 700 },
+    "reserve_level": { "min": 0, "max": 100 }
+  },
+  "enums": {
+    "responsiveness": ["R0", "R1", "R2", "R3"]
+  }
+}

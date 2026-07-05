@@ -1,0 +1,17 @@
+{
+  "content_type": "global_modifiers",
+  "modifiers": [
+    {
+      "id": "remote_recovery_promotion",
+      "min_severity": "S3",
+      "when": { "field": "time_to_service_min.recovery", "op": "gt", "value": 720 },
+      "floor_tier": "D5"
+    },
+    {
+      "id": "offline_untrained_promotion",
+      "min_severity": "S3",
+      "when": { "field": "operator_skill", "op": "eq", "value": "untrained" },
+      "floor_tier": "D4"
+    }
+  ]
+}

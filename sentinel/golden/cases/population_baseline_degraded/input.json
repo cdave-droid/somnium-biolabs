@@ -1,0 +1,68 @@
+{
+  "unit_profile": {
+    "unit_id": "u-002",
+    "service_age_years": 72,
+    "class": "M"
+  },
+  "observations": [
+    {
+      "obs_id": "o000",
+      "unit_id": "u-001",
+      "timestamp": "2026-07-03T10:00:00Z",
+      "type": "cycle_rate",
+      "source": "fixed_monitor",
+      "value": 100
+    },
+    {
+      "obs_id": "o001",
+      "unit_id": "u-001",
+      "timestamp": "2026-07-03T11:30:00Z",
+      "type": "cycle_rate",
+      "source": "fixed_monitor",
+      "value": 104
+    },
+    {
+      "obs_id": "o002",
+      "unit_id": "u-001",
+      "timestamp": "2026-07-03T13:00:00Z",
+      "type": "cycle_rate",
+      "source": "fixed_monitor",
+      "value": 110
+    },
+    {
+      "obs_id": "o003",
+      "unit_id": "u-001",
+      "timestamp": "2026-07-03T10:00:00Z",
+      "type": "pressure_primary",
+      "source": "fixed_monitor",
+      "value": 128
+    },
+    {
+      "obs_id": "o004",
+      "unit_id": "u-001",
+      "timestamp": "2026-07-03T11:30:00Z",
+      "type": "pressure_primary",
+      "source": "fixed_monitor",
+      "value": 121
+    },
+    {
+      "obs_id": "o005",
+      "unit_id": "u-001",
+      "timestamp": "2026-07-03T13:00:00Z",
+      "type": "pressure_primary",
+      "source": "fixed_monitor",
+      "value": 114
+    }
+  ],
+  "context": {
+    "deployment": "mobile_platform",
+    "operator_skill": "technician",
+    "time_to_service_min": {
+      "self_service": 30,
+      "on_site": 20,
+      "recovery": 1440
+    },
+    "connectivity": "intermittent"
+  },
+  "reference_time": null
+}

@@ -1,0 +1,22 @@
+{
+  "01_missing_severity.json": "missing required field 'severity'",
+  "02_bad_severity_enum.json": "not in enum",
+  "03_unknown_operator.json": "not in enum",
+  "04_no_default_tier.json": "missing required field 'default'",
+  "05_unbound_template_var.json": "has no binding",
+  "06_binding_bad_condition.json": "unknown condition id",
+  "07_duplicate_condition_ids.json": "duplicate condition id",
+  "08_unknown_metric.json": "unknown metric",
+  "09_trend_slope_no_min_points.json": "trend_slope requires 'min_points'",
+  "10_raw_op_no_window.json": "requires 'window_min'",
+  "11_unknown_flag.json": "unknown flag",
+  "12_unknown_event_code.json": "not in controlled vocabulary",
+  "13_bad_version_format.json": "does not match pattern",
+  "14_unknown_extra_field.json": "unknown field 'surprise'",
+  "15_wrong_type_priority.json": "expected type integer",
+  "16_empty_required_inputs.json": "fewer than minItems",
+  "17_at_least_n_missing_n.json": "missing required field 'n'",
+  "18_out_of_range_tier.json": "not in enum",
+  "19_negative_window.json": "below minimum",
+  "20_two_comparators.json": "exactly one of gte/lte/eq"
+}

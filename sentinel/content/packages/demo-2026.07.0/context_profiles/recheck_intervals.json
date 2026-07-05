@@ -1,0 +1,4 @@
+{
+  "content_type": "recheck_intervals",
+  "by_tier": { "D0": 1440, "D1": 720, "D2": 240, "D3": 60, "D4": 30, "D5": 15 }
+}

@@ -1,0 +1,47 @@
+{
+  "unit_profile": {
+    "unit_id": "u-003",
+    "service_age_years": 70,
+    "class": "F",
+    "known_conditions": [
+      "reduced_capacity"
+    ]
+  },
+  "observations": [
+    {
+      "obs_id": "o000",
+      "unit_id": "u-001",
+      "timestamp": "2026-07-03T10:00:00Z",
+      "type": "cycle_rate",
+      "source": "fixed_monitor",
+      "value": 72
+    },
+    {
+      "obs_id": "o001",
+      "unit_id": "u-001",
+      "timestamp": "2026-07-03T10:01:00Z",
+      "type": "responsiveness",
+      "source": "manual_entry",
+      "value": "R0"
+    },
+    {
+      "obs_id": "o002",
+      "unit_id": "u-001",
+      "timestamp": "2026-07-03T10:05:00Z",
+      "type": "saturation_pct",
+      "source": "wearable_sensor",
+      "value": 60
+    }
+  ],
+  "context": {
+    "deployment": "fixed_site",
+    "operator_skill": "engineer",
+    "time_to_service_min": {
+      "self_service": 5,
+      "on_site": 5,
+      "recovery": 60
+    },
+    "connectivity": "online"
+  },
+  "reference_time": null
+}

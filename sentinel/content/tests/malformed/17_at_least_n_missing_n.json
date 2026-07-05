@@ -1,0 +1,38 @@
+{
+  "signature_id": "zz_malformed_v1",
+  "version": "1.0.0",
+  "status": "published",
+  "name": "Malformed fixture",
+  "author": "fixture",
+  "reviewers": [
+    "fixture"
+  ],
+  "required_inputs": [
+    "cycle_rate"
+  ],
+  "logic": {
+    "at_least_n_of": {
+      "of": [
+        {
+          "id": "c1",
+          "metric": "cycle_rate",
+          "op": "gte",
+          "value": 100,
+          "window_min": 60
+        }
+      ]
+    }
+  },
+  "severity": "S2",
+  "action_tier_by_context": {
+    "default": "D2"
+  },
+  "explanation_template": "Cycle rate is {v}.",
+  "template_bindings": {
+    "v": {
+      "condition_id": "c1",
+      "field": "value",
+      "round": 0
+    }
+  }
+}

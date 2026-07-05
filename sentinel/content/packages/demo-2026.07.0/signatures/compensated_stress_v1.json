@@ -1,0 +1,34 @@
+{
+  "signature_id": "compensated_stress_v1",
+  "version": "1.0.0",
+  "status": "published",
+  "name": "Compensated stress pattern",
+  "author": "PLACEHOLDER — NOT SME AUTHORED",
+  "reviewers": ["PLACEHOLDER — NOT SME REVIEWED"],
+  "review_date": "2026-07-04",
+  "required_inputs": ["cycle_rate", "pressure_primary"],
+  "optional_inputs": ["responsiveness"],
+  "logic": {
+    "all_of": [
+      { "id": "c_rate", "metric": "cycle_rate", "op": "delta_from_baseline_pct", "gte": 20, "window_min": 240, "min_points": 2 },
+      { "id": "c_pressure", "metric": "pressure_primary", "op": "trend_slope", "lte": -0.05, "unit_per_min": true, "window_min": 240, "min_points": 3 },
+      { "none_of": [{ "flag": "artifact_suspected_any_input" }] }
+    ]
+  },
+  "severity": "S3",
+  "trajectory_override": "worsening",
+  "conflict_group": "cycle_rate_elevation",
+  "priority": 10,
+  "action_tier_by_context": {
+    "fixed_site": "D4",
+    "mobile_platform": "D5",
+    "edge_site": "D4",
+    "default": "D4"
+  },
+  "explanation_template": "Cycle rate has risen {rate_delta_pct}% above this unit's baseline while primary pressure trended down over {window_h} hours — a pattern consistent with early (compensated) overload, where the unit is masking an underlying capacity or supply fault.",
+  "template_bindings": {
+    "rate_delta_pct": { "condition_id": "c_rate", "field": "delta_pct", "round": 0 },
+    "window_h": { "condition_id": "c_rate", "field": "window_h", "round": 0 }
+  },
+  "counterfactual_tests": ["ct_compstress_01", "ct_compstress_02"]
+}

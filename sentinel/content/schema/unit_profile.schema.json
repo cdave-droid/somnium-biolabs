@@ -1,0 +1,31 @@
+{
+  "$id": "unit_profile.schema.json",
+  "title": "UnitProfile",
+  "type": "object",
+  "required": ["unit_id"],
+  "additionalProperties": false,
+  "properties": {
+    "unit_id": { "type": "string", "minLength": 1 },
+    "service_age_years": { "type": "number", "minimum": 0, "maximum": 150 },
+    "class": { "type": "string", "enum": ["M", "F", "X"] },
+    "mass_kg": { "type": "number", "minimum": 0.2, "maximum": 700 },
+    "known_conditions": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "active_mitigations": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "incompatibilities": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "baselines": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["median", "p10", "p90", "window_days", "n_obs"],
+        "additionalProperties": false,
+        "properties": {
+          "median": { "type": "number" },
+          "p10": { "type": "number" },
+          "p90": { "type": "number" },
+          "window_days": { "type": "number", "minimum": 1 },
+          "n_obs": { "type": "integer", "minimum": 0 }
+        }
+      }
+    }
+  }
+}

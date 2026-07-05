@@ -1,0 +1,5 @@
+{
+  "content_type": "baseline_config",
+  "window_days": 14,
+  "min_n_obs": 8
+}

@@ -52,3 +52,10 @@ ai-doctor/data/*.json
 ai-doctor/data/*.parquet
 ai-doctor/results/*.json
 ai-doctor/results/*.csv
+
+# SENTINEL
+sentinel/engine-ts/node_modules/
+sentinel/engine-ts/dist/
+__pycache__/
+*.pyc
+.pytest_cache/

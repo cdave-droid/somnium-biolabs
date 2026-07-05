@@ -1,0 +1,79 @@
+{
+  "unit_profile": {
+    "unit_id": "u-001",
+    "service_age_years": 72,
+    "class": "M",
+    "mass_kg": 82,
+    "known_conditions": [],
+    "active_mitigations": [],
+    "baselines": {
+      "cycle_rate": {
+        "median": 68,
+        "p10": 60,
+        "p90": 78,
+        "window_days": 14,
+        "n_obs": 41
+      },
+      "pressure_primary": {
+        "median": 128,
+        "p10": 115,
+        "p90": 142,
+        "window_days": 14,
+        "n_obs": 30
+      }
+    }
+  },
+  "observations": [
+    {
+      "obs_id": "o000",
+      "unit_id": "u-001",
+      "timestamp": "2026-07-03T09:00:00Z",
+      "type": "cycle_rate",
+      "source": "fixed_monitor",
+      "value": 70
+    },
+    {
+      "obs_id": "o001",
+      "unit_id": "u-001",
+      "timestamp": "2026-07-03T11:00:00Z",
+      "type": "cycle_rate",
+      "source": "fixed_monitor",
+      "value": 72
+    },
+    {
+      "obs_id": "o002",
+      "unit_id": "u-001",
+      "timestamp": "2026-07-03T13:00:00Z",
+      "type": "cycle_rate",
+      "source": "fixed_monitor",
+      "value": 69
+    },
+    {
+      "obs_id": "o003",
+      "unit_id": "u-001",
+      "timestamp": "2026-07-03T13:00:00Z",
+      "type": "pressure_primary",
+      "source": "fixed_monitor",
+      "value": 129
+    },
+    {
+      "obs_id": "o004",
+      "unit_id": "u-001",
+      "timestamp": "2026-07-03T13:05:00Z",
+      "type": "saturation_pct",
+      "source": "fixed_monitor",
+      "value": 97
+    }
+  ],
+  "context": {
+    "deployment": "fixed_site",
+    "operator_skill": "engineer",
+    "time_to_service_min": {
+      "self_service": 5,
+      "on_site": 5,
+      "recovery": 60
+    },
+    "connectivity": "online"
+  },
+  "reference_time": null
+}

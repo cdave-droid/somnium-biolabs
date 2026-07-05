@@ -1,0 +1,33 @@
+{
+  "case_id": "525febfa-f0fe-5810-bccf-bb0dd81bb199",
+  "engine_version": "1.0.0",
+  "content_version": "2026.07.0-demo",
+  "reference_time": null,
+  "severity": "S2",
+  "trajectory": "unknown",
+  "action_tier": "D3",
+  "matched_signatures": [],
+  "suppressed_signatures": [],
+  "not_evaluable_signatures": [],
+  "confidence": "insufficient",
+  "flags": [
+    "content_unsigned",
+    "engine_could_not_fully_evaluate"
+  ],
+  "explanation": "ENGINE COULD NOT FULLY EVALUATE THIS CASE: no usable observations were provided. Action tier D3 is a cautious floor for this deployment context, not a confident assessment. Most valuable next input: any current observation for this unit. Note: The loaded content package is hash-verified but not cryptographically signed.",
+  "reasoning_trace": [
+    {
+      "stage": "M1",
+      "detail": "accepted 0 observations; quarantined 0; notes 0"
+    },
+    {
+      "stage": "M7",
+      "detail": "final severity S2, action tier D3, confidence insufficient"
+    },
+    {
+      "stage": "M8",
+      "detail": "triggers: no_observations"
+    }
+  ],
+  "recommended_recheck_min": 60
+}

@@ -1,0 +1,14 @@
+{
+  "content_type": "trajectory_rules",
+  "window_min": 360,
+  "min_points": 3,
+  "metrics": [
+    { "metric": "cycle_rate", "worse_direction": "up", "slope_per_min": 0.05 },
+    { "metric": "saturation_pct", "worse_direction": "down", "slope_per_min": 0.01 },
+    { "metric": "pressure_primary", "worse_direction": "down", "slope_per_min": 0.02 },
+    { "metric": "temperature_c", "worse_direction": "up", "slope_per_min": 0.002 },
+    { "metric": "reserve_level", "worse_direction": "down", "slope_per_min": 0.01 }
+  ],
+  "worsening_min_signals": 1,
+  "improving_min_signals": 2
+}

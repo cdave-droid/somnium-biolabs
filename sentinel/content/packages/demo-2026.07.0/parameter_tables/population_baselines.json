@@ -1,0 +1,58 @@
+{
+  "content_type": "population_baselines",
+  "age_bands": [
+    { "band": "0-17", "min": 0, "max": 17 },
+    { "band": "18-64", "min": 18, "max": 64 },
+    { "band": "65+", "min": 65, "max": 150 }
+  ],
+  "defaults": [
+    {
+      "match": { "class": "M", "age_band": "65+" },
+      "baselines": {
+        "cycle_rate": { "median": 72, "p10": 58, "p90": 88 },
+        "flow_rate": { "median": 16, "p10": 12, "p90": 20 },
+        "saturation_pct": { "median": 96, "p10": 93, "p90": 99 },
+        "pressure_primary": { "median": 132, "p10": 112, "p90": 152 },
+        "pressure_secondary": { "median": 78, "p10": 65, "p90": 90 },
+        "temperature_c": { "median": 36.6, "p10": 36.1, "p90": 37.2 },
+        "reserve_level": { "median": 80, "p10": 55, "p90": 98 }
+      }
+    },
+    {
+      "match": { "class": "F", "age_band": "65+" },
+      "baselines": {
+        "cycle_rate": { "median": 74, "p10": 60, "p90": 90 },
+        "flow_rate": { "median": 16, "p10": 12, "p90": 20 },
+        "saturation_pct": { "median": 96, "p10": 93, "p90": 99 },
+        "pressure_primary": { "median": 130, "p10": 110, "p90": 150 },
+        "pressure_secondary": { "median": 76, "p10": 64, "p90": 88 },
+        "temperature_c": { "median": 36.6, "p10": 36.1, "p90": 37.2 },
+        "reserve_level": { "median": 80, "p10": 55, "p90": 98 }
+      }
+    },
+    {
+      "match": { "age_band": "18-64" },
+      "baselines": {
+        "cycle_rate": { "median": 70, "p10": 56, "p90": 86 },
+        "flow_rate": { "median": 14, "p10": 11, "p90": 18 },
+        "saturation_pct": { "median": 97, "p10": 95, "p90": 100 },
+        "pressure_primary": { "median": 122, "p10": 104, "p90": 140 },
+        "pressure_secondary": { "median": 76, "p10": 64, "p90": 86 },
+        "temperature_c": { "median": 36.7, "p10": 36.2, "p90": 37.3 },
+        "reserve_level": { "median": 85, "p10": 60, "p90": 100 }
+      }
+    },
+    {
+      "match": {},
+      "baselines": {
+        "cycle_rate": { "median": 75, "p10": 58, "p90": 95 },
+        "flow_rate": { "median": 16, "p10": 12, "p90": 22 },
+        "saturation_pct": { "median": 96, "p10": 93, "p90": 99 },
+        "pressure_primary": { "median": 120, "p10": 100, "p90": 145 },
+        "pressure_secondary": { "median": 75, "p10": 62, "p90": 88 },
+        "temperature_c": { "median": 36.7, "p10": 36.1, "p90": 37.3 },
+        "reserve_level": { "median": 80, "p10": 55, "p90": 98 }
+      }
+    }
+  ]
+}

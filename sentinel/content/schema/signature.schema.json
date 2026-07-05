@@ -1,0 +1,106 @@
+{
+  "$id": "signature.schema.json",
+  "title": "Signature",
+  "type": "object",
+  "required": ["signature_id", "version", "status", "name", "author", "reviewers", "required_inputs", "logic", "severity", "action_tier_by_context", "explanation_template"],
+  "additionalProperties": false,
+  "properties": {
+    "signature_id": { "type": "string", "pattern": "^[a-z0-9_]+$", "minLength": 1 },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "status": { "type": "string", "enum": ["draft", "in_review", "published", "retired"] },
+    "name": { "type": "string", "minLength": 1 },
+    "author": { "type": "string", "minLength": 1 },
+    "reviewers": { "type": "array", "items": { "type": "string" } },
+    "review_date": { "type": "string" },
+    "required_inputs": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+    "optional_inputs": { "type": "array", "items": { "type": "string" } },
+    "requires_personalized_baseline": { "type": "boolean" },
+    "logic": { "$ref": "#/$defs/combinator" },
+    "severity": { "type": "string", "enum": ["S1", "S2", "S3", "S4"] },
+    "trajectory_override": { "type": "string", "enum": ["improving", "stable", "worsening", "unknown"] },
+    "conflict_group": { "type": "string" },
+    "priority": { "type": "integer", "minimum": 0 },
+    "action_tier_by_context": {
+      "type": "object",
+      "required": ["default"],
+      "additionalProperties": false,
+      "properties": {
+        "fixed_site": { "$ref": "#/$defs/tier" },
+        "mobile_platform": { "$ref": "#/$defs/tier" },
+        "field_expedition": { "$ref": "#/$defs/tier" },
+        "remote_station": { "$ref": "#/$defs/tier" },
+        "edge_site": { "$ref": "#/$defs/tier" },
+        "default": { "$ref": "#/$defs/tier" }
+      }
+    },
+    "explanation_template": { "type": "string", "minLength": 1 },
+    "template_bindings": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["condition_id", "field"],
+        "additionalProperties": false,
+        "properties": {
+          "condition_id": { "type": "string", "minLength": 1 },
+          "field": { "type": "string", "enum": ["value", "delta_pct", "delta_abs", "slope", "count", "sustained_min", "window_min", "window_h", "baseline_median", "threshold"] },
+          "round": { "type": "integer", "minimum": 0, "maximum": 6 }
+        }
+      }
+    },
+    "counterfactual_tests": { "type": "array", "items": { "type": "string" } }
+  },
+  "$defs": {
+    "tier": { "type": "string", "enum": ["D0", "D1", "D2", "D3", "D4", "D5"] },
+    "combinator": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "all_of": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/node" } },
+        "any_of": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/node" } },
+        "none_of": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/node" } },
+        "at_least_n_of": {
+          "type": "object",
+          "required": ["n", "of"],
+          "additionalProperties": false,
+          "properties": {
+            "n": { "type": "integer", "minimum": 1 },
+            "of": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/node" } }
+          }
+        }
+      }
+    },
+    "node": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "all_of": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/node" } },
+        "any_of": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/node" } },
+        "none_of": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/node" } },
+        "at_least_n_of": {
+          "type": "object",
+          "required": ["n", "of"],
+          "additionalProperties": false,
+          "properties": {
+            "n": { "type": "integer", "minimum": 1 },
+            "of": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/node" } }
+          }
+        },
+        "id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+        "metric": { "type": "string" },
+        "op": { "type": "string", "enum": ["gte", "lte", "eq", "delta_from_baseline_abs", "delta_from_baseline_pct", "trend_slope", "crossed_threshold_count", "sustained_for_min", "event_present"] },
+        "value": {},
+        "gte": { "type": "number" },
+        "lte": { "type": "number" },
+        "eq": {},
+        "window_min": { "type": "number", "minimum": 1 },
+        "min_points": { "type": "integer", "minimum": 1 },
+        "threshold": { "type": "number" },
+        "direction": { "type": "string", "enum": ["above", "below"] },
+        "event_id": { "type": "string" },
+        "unit_per_min": { "type": "boolean" },
+        "flag": { "type": "string" },
+        "baseline_status": { "type": "string", "enum": ["personalized", "population_default", "unavailable"] }
+      }
+    }
+  }
+}

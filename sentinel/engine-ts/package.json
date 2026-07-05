@@ -1,0 +1,14 @@
+{
+  "name": "sentinel-engine",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "SENTINEL deterministic evaluation engine (TypeScript runtime, byte-parity with engine-py)",
+  "scripts": {
+    "build": "tsc",
+    "test": "npm run build && node --test dist/test/*.test.js"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.0",
+    "typescript": "^5.5"
+  }
+}

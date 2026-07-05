@@ -1,0 +1,55 @@
+{
+  "unit_profile": {
+    "unit_id": "u-001",
+    "service_age_years": 72,
+    "class": "M",
+    "mass_kg": 82,
+    "known_conditions": [],
+    "active_mitigations": [],
+    "baselines": {
+      "cycle_rate": {
+        "median": 68,
+        "p10": 60,
+        "p90": 78,
+        "window_days": 14,
+        "n_obs": 41
+      },
+      "pressure_primary": {
+        "median": 128,
+        "p10": 115,
+        "p90": 142,
+        "window_days": 14,
+        "n_obs": 30
+      }
+    }
+  },
+  "observations": [
+    {
+      "obs_id": "o000",
+      "unit_id": "u-001",
+      "timestamp": "2026-07-03T10:00:00Z",
+      "type": "event",
+      "source": "event_report",
+      "event_id": "EV_MYSTERY"
+    },
+    {
+      "obs_id": "o001",
+      "unit_id": "u-001",
+      "timestamp": "2026-07-03T10:00:00Z",
+      "type": "cycle_rate",
+      "source": "fixed_monitor",
+      "value": 74
+    }
+  ],
+  "context": {
+    "deployment": "fixed_site",
+    "operator_skill": "engineer",
+    "time_to_service_min": {
+      "self_service": 5,
+      "on_site": 5,
+      "recovery": 60
+    },
+    "connectivity": "online"
+  },
+  "reference_time": null
+}

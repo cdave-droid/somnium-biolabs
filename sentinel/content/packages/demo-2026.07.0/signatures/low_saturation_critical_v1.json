@@ -1,0 +1,25 @@
+{
+  "signature_id": "low_saturation_critical_v1",
+  "version": "1.0.0",
+  "status": "published",
+  "name": "Critically low saturation",
+  "author": "PLACEHOLDER — NOT SME AUTHORED",
+  "reviewers": ["PLACEHOLDER — NOT SME REVIEWED"],
+  "review_date": "2026-07-04",
+  "required_inputs": ["saturation_pct"],
+  "logic": {
+    "all_of": [
+      { "id": "c_sat", "metric": "saturation_pct", "op": "lte", "value": 85, "window_min": 60 },
+      { "none_of": [{ "flag": "artifact_suspected_any_input" }] }
+    ]
+  },
+  "severity": "S4",
+  "action_tier_by_context": {
+    "default": "D5"
+  },
+  "explanation_template": "Saturation is at {sat_value}% — below the critical bound of 85%. This level requires the strongest available response regardless of other readings.",
+  "template_bindings": {
+    "sat_value": { "condition_id": "c_sat", "field": "value", "round": 0 }
+  },
+  "counterfactual_tests": ["ct_lowsat_01"]
+}

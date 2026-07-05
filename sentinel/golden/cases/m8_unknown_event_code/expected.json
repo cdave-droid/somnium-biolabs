@@ -1,0 +1,82 @@
+{
+  "case_id": "7ff09b57-e150-5f73-bf02-8e6828a16cb7",
+  "engine_version": "1.0.0",
+  "content_version": "2026.07.0-demo",
+  "reference_time": "2026-07-03T10:00:00Z",
+  "severity": "S2",
+  "trajectory": "unknown",
+  "action_tier": "D2",
+  "matched_signatures": [],
+  "suppressed_signatures": [],
+  "not_evaluable_signatures": [
+    {
+      "id": "compensated_stress_v1",
+      "reason": "missing_required_input:pressure_primary"
+    },
+    {
+      "id": "low_saturation_critical_v1",
+      "reason": "missing_required_input:saturation_pct"
+    },
+    {
+      "id": "reserve_depletion_v1",
+      "reason": "missing_required_input:reserve_level"
+    },
+    {
+      "id": "unresponsive_unit_v1",
+      "reason": "missing_required_input:responsiveness"
+    }
+  ],
+  "confidence": "insufficient",
+  "flags": [
+    "baseline_ok",
+    "content_unsigned",
+    "data_rejected",
+    "engine_could_not_fully_evaluate",
+    "signatures_not_evaluable",
+    "unknown_event_code"
+  ],
+  "explanation": "ENGINE COULD NOT FULLY EVALUATE THIS CASE: an event report used a code outside the controlled vocabulary. Action tier D2 is a cautious floor for this deployment context, not a confident assessment. Most valuable next input: a current pressure_primary observation. Note: Personalized baselines were available for all evaluated metrics. Note: The loaded content package is hash-verified but not cryptographically signed. Note: One or more readings were physically impossible and were quarantined (logged, excluded from logic). Note: One or more signatures could not be evaluated for this case (missing inputs or insufficient data). Note: An event report used a code that is not in the controlled vocabulary; the engine cannot interpret it.",
+  "reasoning_trace": [
+    {
+      "stage": "M1",
+      "detail": "accepted 1 observations; quarantined 1; notes 0"
+    },
+    {
+      "stage": "M1",
+      "detail": "quarantined o000: unknown_event_code:EV_MYSTERY"
+    },
+    {
+      "stage": "M3",
+      "detail": "baseline cycle_rate: personalized (source=profile, median=68, n_obs=41)"
+    },
+    {
+      "stage": "M4",
+      "detail": "trajectory unknown (worse_signals=0, improving_signals=0, metrics_evaluated=0)"
+    },
+    {
+      "stage": "M5",
+      "detail": "compensated_stress_v1 not_evaluable (missing_required_input:pressure_primary)"
+    },
+    {
+      "stage": "M5",
+      "detail": "low_saturation_critical_v1 not_evaluable (missing_required_input:saturation_pct)"
+    },
+    {
+      "stage": "M5",
+      "detail": "reserve_depletion_v1 not_evaluable (missing_required_input:reserve_level)"
+    },
+    {
+      "stage": "M5",
+      "detail": "unresponsive_unit_v1 not_evaluable (missing_required_input:responsiveness)"
+    },
+    {
+      "stage": "M7",
+      "detail": "final severity S2, action tier D2, confidence insufficient"
+    },
+    {
+      "stage": "M8",
+      "detail": "triggers: unknown_event_code"
+    }
+  ],
+  "recommended_recheck_min": 240
+}

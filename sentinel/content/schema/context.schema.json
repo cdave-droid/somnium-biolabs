@@ -1,0 +1,27 @@
+{
+  "$id": "context.schema.json",
+  "title": "ContextObject",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "deployment": {
+      "type": "string",
+      "enum": ["fixed_site", "mobile_platform", "field_expedition", "remote_station", "edge_site"]
+    },
+    "operator_skill": {
+      "type": "string",
+      "enum": ["untrained", "basic", "technician", "engineer"]
+    },
+    "time_to_service_min": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "self_service": { "type": "number", "minimum": 0 },
+        "on_site": { "type": "number", "minimum": 0 },
+        "recovery": { "type": "number", "minimum": 0 }
+      }
+    },
+    "resources": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "connectivity": { "type": "string", "enum": ["online", "intermittent", "offline"] }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "content_type": "floors",
+  "insufficient_floor_by_deployment": {
+    "fixed_site": { "action_tier": "D2", "severity": "S2" },
+    "mobile_platform": { "action_tier": "D3", "severity": "S2" },
+    "field_expedition": { "action_tier": "D3", "severity": "S2" },
+    "remote_station": { "action_tier": "D3", "severity": "S2" },
+    "edge_site": { "action_tier": "D3", "severity": "S2" },
+    "default": { "action_tier": "D3", "severity": "S2" }
+  },
+  "mechanism_floor": "D3"
+}

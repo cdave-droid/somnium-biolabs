@@ -1,0 +1,15 @@
+{
+  "content_type": "worse_direction",
+  "directions": {
+    "cycle_rate": "up",
+    "flow_rate": "up",
+    "saturation_pct": "down",
+    "pressure_primary": "down",
+    "pressure_secondary": "down",
+    "temperature_c": "up",
+    "strain_0_10": "up",
+    "mass_kg": "none",
+    "reserve_level": "down",
+    "responsiveness": "up"
+  }
+}

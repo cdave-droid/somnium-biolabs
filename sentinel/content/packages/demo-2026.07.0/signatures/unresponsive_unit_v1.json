@@ -1,0 +1,24 @@
+{
+  "signature_id": "unresponsive_unit_v1",
+  "version": "1.0.0",
+  "status": "published",
+  "name": "Minimal or absent responsiveness",
+  "author": "PLACEHOLDER — NOT SME AUTHORED",
+  "reviewers": ["PLACEHOLDER — NOT SME REVIEWED"],
+  "review_date": "2026-07-04",
+  "required_inputs": ["responsiveness"],
+  "logic": {
+    "all_of": [
+      { "id": "c_resp", "metric": "responsiveness", "op": "gte", "value": "R2", "window_min": 120 }
+    ]
+  },
+  "severity": "S4",
+  "action_tier_by_context": {
+    "default": "D5"
+  },
+  "explanation_template": "Responsiveness is {resp_value} (minimal or unresponsive). This is treated as a top-severity state in every deployment context.",
+  "template_bindings": {
+    "resp_value": { "condition_id": "c_resp", "field": "value", "round": 0 }
+  },
+  "counterfactual_tests": ["ct_unresponsive_01"]
+}

@@ -1,0 +1,10 @@
+{
+  "content_type": "event_codes",
+  "codes": [
+    { "event_id": "EV_POWER_LOSS", "name": "Power loss reported" },
+    { "event_id": "EV_IMPACT", "name": "Impact detected" },
+    { "event_id": "EV_LEAK", "name": "Leak observed" },
+    { "event_id": "EV_MANUAL_RESTART", "name": "Manual restart performed" },
+    { "event_id": "EV_INTERMITTENT_FAULT", "name": "Intermittent fault reported" }
+  ]
+}

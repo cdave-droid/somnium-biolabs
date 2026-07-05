@@ -1,0 +1,21 @@
+{
+  "content_type": "units",
+  "canonical": {
+    "cycle_rate": "rpm",
+    "flow_rate": "cpm",
+    "saturation_pct": "pct",
+    "pressure_primary": "torr",
+    "pressure_secondary": "torr",
+    "temperature_c": "c",
+    "strain_0_10": "score",
+    "mass_kg": "kg",
+    "reserve_level": "pct",
+    "responsiveness": "scale"
+  },
+  "conversions": [
+    { "type": "temperature_c", "from": "f", "factor": 0.5555555556, "offset": -17.7777777778 },
+    { "type": "mass_kg", "from": "lb", "factor": 0.45359237, "offset": 0 },
+    { "type": "pressure_primary", "from": "kpa", "factor": 7.5006157585, "offset": 0 },
+    { "type": "pressure_secondary", "from": "kpa", "factor": 7.5006157585, "offset": 0 }
+  ]
+}

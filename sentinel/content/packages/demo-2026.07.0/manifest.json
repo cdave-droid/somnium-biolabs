@@ -1,0 +1,79 @@
+{
+  "content_type": "manifest",
+  "package_version": "2026.07.0-demo",
+  "min_engine_version": "1.0.0",
+  "signing": {
+    "algorithm": "none"
+  },
+  "files": [
+    {
+      "path": "context_profiles/global_modifiers.json",
+      "sha256": "cba13e67f2f6f10cb82bc9af4d89ac4287e87c9c51e5c66ab747ba5f57bb8788"
+    },
+    {
+      "path": "context_profiles/recheck_intervals.json",
+      "sha256": "769caf9ad03ad1bdc5c91e3e581cec9600c9e37f1a79f6296af6009c46ad8b3d"
+    },
+    {
+      "path": "context_profiles/trajectory_rules.json",
+      "sha256": "b764952d4f225b2fc3a8c74f8e48ce392ec7e2e3d5bac2a5b101be21c9172fd6"
+    },
+    {
+      "path": "parameter_tables/baseline_config.json",
+      "sha256": "1aeaeab751159d3c5699133180d60ecfbe6a8ef6c46604c748aa20f471fdf82e"
+    },
+    {
+      "path": "parameter_tables/population_baselines.json",
+      "sha256": "e6161da622ee23176d27d4740473e87ff17d2fdff9a7c01d932585e63167bae9"
+    },
+    {
+      "path": "parameter_tables/units.json",
+      "sha256": "3893f4c321288064273b017829c2e5aee14224f3f048b93008b00a7e5c5d28db"
+    },
+    {
+      "path": "parameter_tables/worse_direction.json",
+      "sha256": "3f0bbe8edd967db5467167d2aa23f780b63c010aff0195b9ef6fe2abf917978b"
+    },
+    {
+      "path": "quality_rules/artifact_rules.json",
+      "sha256": "c7a6b8a29e92978e8d5fd2ebd9c788c4c5739cf01d4b283070a968991f3be1e3"
+    },
+    {
+      "path": "signatures/compensated_stress_v1.json",
+      "sha256": "d4810e79f3c90216731c90101822a2d105df6bf07f9f13ef45c83d4dbf07df28"
+    },
+    {
+      "path": "signatures/high_cycle_rate_simple_v1.json",
+      "sha256": "2d2fcf0e43ef7f8ac117f7cb31a818337e98dd5be9d9295ab26f22fb85e10c7d"
+    },
+    {
+      "path": "signatures/low_saturation_critical_v1.json",
+      "sha256": "30fe25de3d333aba057101b6142c89dcccbaf79dfecf7275d859275d501cfecc"
+    },
+    {
+      "path": "signatures/reserve_depletion_v1.json",
+      "sha256": "5529fa8360d12f6370be9e782b7547940008c1f731b816ff9abc2291e08de451"
+    },
+    {
+      "path": "signatures/unresponsive_unit_v1.json",
+      "sha256": "83eb7767a5ec5c8b2103464771e5cc424bded53105eb97c8f56f69cde90605dc"
+    },
+    {
+      "path": "thresholds/floors.json",
+      "sha256": "bb063e31efbca670807ce53947b2baaebb15d6217dfa24fe8bbec72a1cd11b0c"
+    },
+    {
+      "path": "thresholds/never_ignore.json",
+      "sha256": "cd17848fb688a298f769b4bc7eb12a532ff36d5dbb8edfe076bc3f2b3b422da1"
+    },
+    {
+      "path": "thresholds/operational_bounds.json",
+      "sha256": "a2477cbf069369bb5aeb20a4a9435a2f388c2f7b4a349479ae5dbf01ea2629e3"
+    },
+    {
+      "path": "vocab/event_codes.json",
+      "sha256": "a83785f92378b324af325e2c9d68f382d244820c48e141b470e56b08545ed055"
+    }
+  ],
+  "package_hash": "15e8c5e524e2ce27af1212a964e9e35620562fa904e2fb798f90d39aa92ee381"
+}

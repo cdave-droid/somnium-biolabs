@@ -1,0 +1,29 @@
+{
+  "signature_id": "high_cycle_rate_simple_v1",
+  "version": "1.0.0",
+  "status": "published",
+  "name": "Sustained high cycle rate",
+  "author": "PLACEHOLDER — NOT SME AUTHORED",
+  "reviewers": ["PLACEHOLDER — NOT SME REVIEWED"],
+  "review_date": "2026-07-04",
+  "required_inputs": ["cycle_rate"],
+  "logic": {
+    "all_of": [
+      { "id": "c_sustained", "metric": "cycle_rate", "op": "sustained_for_min", "threshold": 130, "direction": "above", "gte": 30, "window_min": 240 }
+    ]
+  },
+  "severity": "S2",
+  "conflict_group": "cycle_rate_elevation",
+  "priority": 5,
+  "action_tier_by_context": {
+    "fixed_site": "D2",
+    "mobile_platform": "D3",
+    "default": "D2"
+  },
+  "explanation_template": "Cycle rate has stayed above {threshold} for at least {sustained_min} minutes — a sustained elevation that warrants review even without other abnormal readings.",
+  "template_bindings": {
+    "threshold": { "condition_id": "c_sustained", "field": "threshold", "round": 0 },
+    "sustained_min": { "condition_id": "c_sustained", "field": "sustained_min", "round": 0 }
+  },
+  "counterfactual_tests": ["ct_highrate_01"]
+}

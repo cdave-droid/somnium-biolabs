@@ -1,0 +1,34 @@
+{
+  "content_type": "artifact_rules",
+  "impossible_jump": [
+    { "id": "aj_saturation", "metric": "saturation_pct", "max_change_per_s": 5 },
+    { "id": "aj_cycle_rate", "metric": "cycle_rate", "max_change_per_s": 8 },
+    { "id": "aj_temperature", "metric": "temperature_c", "max_change_per_s": 0.5 },
+    { "id": "aj_mass", "metric": "mass_kg", "max_change_per_s": 0.05 }
+  ],
+  "spike_and_recover": [
+    { "id": "sr_saturation", "metric": "saturation_pct", "window_s": 90, "drop_pct": 30, "recovery_pct": 95 },
+    { "id": "sr_pressure", "metric": "pressure_primary", "window_s": 120, "drop_pct": 40, "recovery_pct": 95 }
+  ],
+  "cross_contradiction": [
+    {
+      "id": "xc_sat_normal_vitals",
+      "metric": "saturation_pct",
+      "op": "lte",
+      "value": 75,
+      "requires_all": [
+        { "metric": "cycle_rate", "op": "between", "min": 50, "max": 100 },
+        { "metric": "responsiveness", "op": "eq", "value": "R0" }
+      ],
+      "mark": "artifact_likely"
+    }
+  ],
+  "source_prior": [
+    { "id": "sp_wearable_noise", "source": "wearable_sensor", "when_noise_flag": true, "mark": "suspect" }
+  ],
+  "mechanism_map": {
+    "throttled_mode": ["flow_rate", "cycle_rate"],
+    "reduced_capacity": ["saturation_pct"],
+    "intermittent_cycling": ["cycle_rate"]
+  }
+}

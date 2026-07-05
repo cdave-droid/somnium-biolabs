@@ -1,0 +1,30 @@
+{
+  "signature_id": "reserve_depletion_v1",
+  "version": "1.0.0",
+  "status": "published",
+  "name": "Reserve depletion trend",
+  "author": "PLACEHOLDER — NOT SME AUTHORED",
+  "reviewers": ["PLACEHOLDER — NOT SME REVIEWED"],
+  "review_date": "2026-07-04",
+  "required_inputs": ["reserve_level"],
+  "logic": {
+    "all_of": [
+      { "id": "c_level", "metric": "reserve_level", "op": "lte", "value": 30, "window_min": 720 },
+      { "id": "c_slope", "metric": "reserve_level", "op": "trend_slope", "lte": -0.02, "unit_per_min": true, "window_min": 720, "min_points": 3 }
+    ]
+  },
+  "severity": "S3",
+  "trajectory_override": "worsening",
+  "action_tier_by_context": {
+    "fixed_site": "D3",
+    "mobile_platform": "D4",
+    "field_expedition": "D4",
+    "default": "D3"
+  },
+  "explanation_template": "Reserve level is at {level_value} and falling (slope {level_slope} per minute over the last 12 hours). At this rate the reserve will be exhausted without intervention.",
+  "template_bindings": {
+    "level_value": { "condition_id": "c_level", "field": "value", "round": 0 },
+    "level_slope": { "condition_id": "c_slope", "field": "slope", "round": 3 }
+  },
+  "counterfactual_tests": ["ct_reserve_01"]
+}
