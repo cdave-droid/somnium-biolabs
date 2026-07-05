@@ -51,10 +51,17 @@ _ESCAPES = {'"': '\\"', "\\": "\\\\", "\b": "\\b", "\f": "\\f", "\n": "\\n", "\r
 def _escape(s: str) -> str:
     out = []
     for ch in s:
+        code = ord(ch)
         if ch in _ESCAPES:
             out.append(_ESCAPES[ch])
-        elif ord(ch) < 0x20:
-            out.append("\\u%04x" % ord(ch))
+        elif code < 0x20:
+            out.append("\\u%04x" % code)
+        elif 0xD800 <= code <= 0xDFFF:
+            # Lone surrogate (reachable via JSON "\ud800"): replaced with
+            # U+FFFD in BOTH runtimes so UTF-8 encoding never throws and the
+            # canonical bytes stay identical (engine-ts pairs valid surrogates
+            # into astral characters first; only unpaired ones land here).
+            out.append("�")
         else:
             out.append(ch)
     return "".join(out)

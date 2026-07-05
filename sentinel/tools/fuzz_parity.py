@@ -39,6 +39,10 @@ def random_case(rng: random.Random) -> dict:
         profile["known_conditions"] = rng.sample(
             ["reduced_capacity", "intermittent_cycling", "throttled_mode", "other_condition",
              "constructor", "__proto__"], rng.randint(1, 2))
+    if rng.random() < 0.08:  # malformed shapes must normalize identically
+        profile["known_conditions"] = rng.choice([None, "reduced_capacity", 42, [1, "ok"]])
+    if rng.random() < 0.08:
+        profile["service_age_years"] = rng.choice(["old", None, True])
     if rng.random() < 0.5:
         profile["baselines"] = {
             "cycle_rate": {"median": rng.randint(55, 95), "p10": 50, "p90": 100,
@@ -75,9 +79,11 @@ def random_case(rng: random.Random) -> dict:
             obs = {"obs_id": f"o{i:03d}", "unit_id": profile["unit_id"], "timestamp": ts,
                    "type": "event", "event_id": rng.choice(EVENTS), "source": "event_report"}
         else:
+            text = "note ~ " + "x" * rng.randint(0, 10)
+            if rng.random() < 0.2:
+                text += " \ud800"  # lone surrogate -> U+FFFD in both runtimes
             obs = {"obs_id": f"o{i:03d}", "unit_id": profile["unit_id"], "timestamp": ts,
-                   "type": "free_text_note", "text": "note ~ " + "x" * rng.randint(0, 10),
-                   "source": "manual_entry"}
+                   "type": "free_text_note", "text": text, "source": "manual_entry"}
         if rng.random() < 0.05 and observations:
             obs["obs_id"] = observations[rng.randrange(len(observations))]["obs_id"]  # duplicate
         if rng.random() < 0.03:
@@ -85,6 +91,10 @@ def random_case(rng: random.Random) -> dict:
         observations.append(obs)
 
     context = None
+    if rng.random() < 0.05:
+        return {"unit_profile": profile, "observations": observations,
+                "context": rng.choice(["yesterday", 42, ["fixed_site"]]),
+                "reference_time": None}
     if rng.random() < 0.9:
         context = {}
         if rng.random() < 0.9:

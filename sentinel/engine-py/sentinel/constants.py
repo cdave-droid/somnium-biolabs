@@ -52,6 +52,8 @@ FLAG_TEXTS = {
     "duplicate_obs_id": "A duplicate observation id was ignored.",
     "engine_could_not_fully_evaluate": "THE ENGINE COULD NOT FULLY EVALUATE THIS CASE — the recommendation below is a cautious floor, not a confident assessment.",
     "internal_error": "An internal error occurred; the engine failed toward caution.",
+    "invalid_context_fields": "Some context fields were malformed and were ignored.",
+    "invalid_profile_fields": "Some unit-profile fields were malformed and were ignored.",
     "missing_context": "No deployment context was provided; default tiers and the most cautious floors were used.",
     "never_ignore_breach": "A reading breached a never-ignore absolute bound; the response tier was floored accordingly.",
     "never_ignore_breach_on_artifact": "A reading breached a never-ignore absolute bound but looks like a sensor artifact; the engine escalated instead of dismissing it — re-measure immediately.",

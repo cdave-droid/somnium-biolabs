@@ -114,6 +114,129 @@ function maxByTraj(trajectories: string[]): string {
   return best;
 }
 
+function isNum(v: unknown): boolean {
+  return typeof v === "number";
+}
+
+function strList(v: unknown): string[] | null {
+  if (!Array.isArray(v)) {
+    return null;
+  }
+  return v.filter((x) => typeof x === "string");
+}
+
+/** Coerce a malformed unit profile to a safe shape (DECISIONS D12/GAPS A5
+ * class). Dropped fields are flagged — never trusted, never crashed on. */
+function normalizeProfile(profile: any, flags: Set<string>): any {
+  if (profile === null || typeof profile !== "object" || Array.isArray(profile)) {
+    flags.add("invalid_profile_fields");
+    return {};
+  }
+  const out: Record<string, unknown> = {};
+  let dropped = false;
+  for (const [key, value] of Object.entries(profile)) {
+    if (key === "known_conditions" || key === "active_mitigations" || key === "incompatibilities") {
+      const cleaned = strList(value);
+      if (cleaned === null) {
+        dropped = true;
+        continue;
+      }
+      if (cleaned.length !== (value as unknown[]).length) {
+        dropped = true;
+      }
+      out[key] = cleaned;
+    } else if (key === "service_age_years" || key === "mass_kg") {
+      if (isNum(value)) {
+        out[key] = value;
+      } else {
+        dropped = true;
+      }
+    } else if (key === "baselines") {
+      if (value === null || typeof value !== "object" || Array.isArray(value)) {
+        dropped = true;
+        continue;
+      }
+      const cleanedB: Record<string, unknown> = {};
+      for (const [metric, b] of Object.entries(value as Record<string, any>)) {
+        if (
+          b !== null && typeof b === "object" && !Array.isArray(b) &&
+          ["median", "p10", "p90", "n_obs"].every((f) => isNum(b[f]))
+        ) {
+          cleanedB[metric] = b;
+        } else {
+          dropped = true;
+        }
+      }
+      out[key] = cleanedB;
+    } else if (key === "unit_id" || key === "class") {
+      if (typeof value === "string") {
+        out[key] = value;
+      } else {
+        dropped = true;
+      }
+    } else {
+      out[key] = value;
+    }
+  }
+  if (dropped) {
+    flags.add("invalid_profile_fields");
+  }
+  return out;
+}
+
+function normalizeContext(context: any, flags: Set<string>): any {
+  if (context === null || context === undefined) {
+    return null;
+  }
+  if (typeof context !== "object" || Array.isArray(context)) {
+    flags.add("invalid_context_fields");
+    return null;
+  }
+  const out: Record<string, unknown> = {};
+  let dropped = false;
+  for (const [key, value] of Object.entries(context)) {
+    if (key === "deployment" || key === "operator_skill" || key === "connectivity") {
+      if (typeof value === "string") {
+        out[key] = value;
+      } else {
+        dropped = true;
+      }
+    } else if (key === "time_to_service_min") {
+      if (value !== null && typeof value === "object" && !Array.isArray(value)) {
+        const entries = Object.entries(value as Record<string, unknown>);
+        const cleaned: Record<string, unknown> = {};
+        for (const [k, v] of entries) {
+          if (isNum(v)) {
+            cleaned[k] = v;
+          }
+        }
+        if (Object.keys(cleaned).length !== entries.length) {
+          dropped = true;
+        }
+        out[key] = cleaned;
+      } else {
+        dropped = true;
+      }
+    } else if (key === "resources") {
+      const cleaned = strList(value);
+      if (cleaned === null) {
+        dropped = true;
+      } else {
+        if (cleaned.length !== (value as unknown[]).length) {
+          dropped = true;
+        }
+        out[key] = cleaned;
+      }
+    } else {
+      out[key] = value;
+    }
+  }
+  if (dropped) {
+    flags.add("invalid_context_fields");
+  }
+  return out;
+}
+
 function breaches(bound: any, value: unknown, enums: Record<string, string[]>): boolean {
   const metric = bound.metric;
   let v: number;
@@ -169,7 +292,16 @@ export class Engine {
       // prime directive 2: fail toward caution
       output = this.emergencyOutput(inputs, exc);
     }
-    this.audit.append("case_input", output.case_id, ENGINE_VERSION, this.content.content_version, inputs);
+    // M9 recording must also fail toward caution: raw caller inputs may be
+    // unserializable (non-finite numbers passed programmatically) and must
+    // not make evaluate() throw after the safe output was already built.
+    try {
+      this.audit.append("case_input", output.case_id, ENGINE_VERSION, this.content.content_version, inputs);
+    } catch {
+      this.audit.append("case_input", output.case_id, ENGINE_VERSION, this.content.content_version, {
+        unserializable_input: true,
+      });
+    }
     this.audit.append("case_output", output.case_id, ENGINE_VERSION, this.content.content_version, {
       output,
     });
@@ -213,6 +345,12 @@ export class Engine {
             `replay requires content ${inp.content_version}, loaded ${this.content.content_version}`,
           );
         }
+        if ((inp.payload as any).unserializable_input) {
+          // Inputs could not be recorded canonically, so the case cannot be
+          // re-executed; the chained output record itself remains
+          // tamper-evident. Skipped, never silently mutated.
+          continue;
+        }
         const p = inp.payload as any;
         const fresh = new Engine(this.content).evaluate(
           p.unit_profile,
@@ -241,6 +379,11 @@ export class Engine {
     const flags = new Set<string>(content.flags);
     const trace: TraceEntry[] = [];
     const m8Triggers: string[] = [];
+
+    // Malformed profile/context shapes are normalized identically in both
+    // runtimes (flagged, never crashed on, never silently trusted).
+    unitProfile = normalizeProfile(unitProfile, flags);
+    context = normalizeContext(context, flags);
 
     // M1 — ingest & validate
     const [accepted, quarantined, notes] = ingest(observations, content, flags);
@@ -402,6 +545,11 @@ export class Engine {
 
     const floorsTable = content.tables["floors"].insufficient_floor_by_deployment;
     const deployment = context?.deployment ?? null;
+    // Central missing-context flag: absent context/deployment must surface
+    // on EVERY output path, not only when a signature happened to match.
+    if (!pyTruthy(context) || typeof deployment !== "string" || deployment === "") {
+      flags.add("missing_context");
+    }
     const floorEntry = pyTruthy(deployment)
       ? (ownGet(floorsTable, deployment) ?? floorsTable.default)
       : floorsTable.default;
@@ -457,6 +605,8 @@ export class Engine {
       "artifact_with_mechanism",
       "duplicate_obs_id",
       "baseline_zero_division",
+      "invalid_profile_fields",
+      "invalid_context_fields",
     ];
     let confidence: string;
     if (m8Active) {
@@ -514,14 +664,25 @@ export class Engine {
       trace.push({ stage: "M8", detail: "triggers: " + Array.from(new Set(m8Triggers)).sort().join(",") });
     }
 
-    const caseId = deterministicUuid({
-      unit_profile: unitProfile,
-      observations,
-      context,
-      reference_time: referenceTimeArg,
-      engine_version: ENGINE_VERSION,
-      content_version: content.content_version,
-    });
+    let caseId: string;
+    try {
+      caseId = deterministicUuid({
+        unit_profile: unitProfile,
+        observations,
+        context,
+        reference_time: referenceTimeArg,
+        engine_version: ENGINE_VERSION,
+        content_version: content.content_version,
+      });
+    } catch {
+      trace.push({ stage: "M9", detail: "case_id derived from sanitized inputs (raw inputs not canonically serializable)" });
+      caseId = deterministicUuid({
+        unserializable_input: true,
+        observation_count: observations.length,
+        engine_version: ENGINE_VERSION,
+        content_version: content.content_version,
+      });
+    }
     return {
       case_id: caseId,
       engine_version: ENGINE_VERSION,
@@ -578,7 +739,6 @@ export class Engine {
     const flags = Array.from(
       new Set<string>([...content.flags, "internal_error", "engine_could_not_fully_evaluate"]),
     ).sort();
-    const excName = exc instanceof Error ? exc.constructor.name : "Error";
     let caseId: string;
     try {
       caseId = deterministicUuid({
@@ -587,12 +747,14 @@ export class Engine {
         content_version: content.content_version,
       });
     } catch {
-      caseId = deterministicUuid({ unserializable_input: excName });
+      caseId = deterministicUuid({ unserializable_input: true });
     }
     const recheck = content.tables["recheck_intervals"].by_tier[tier];
+    // Exception class names are runtime-specific; the deterministic output
+    // carries a stable fault marker only (details belong in ops logs).
     let explanation =
-      "ENGINE COULD NOT FULLY EVALUATE THIS CASE: an internal error occurred during evaluation" +
-      ` (${excName}). Action tier ${tier} is the maximum configured safe floor,` +
+      "ENGINE COULD NOT FULLY EVALUATE THIS CASE: an internal error occurred during evaluation." +
+      ` Action tier ${tier} is the maximum configured safe floor,` +
       " not a confident assessment. Most valuable next input: none — this is an engine fault;" +
       " escalate per the floor tier and report the fault.";
     for (const flag of flags) {
@@ -614,7 +776,7 @@ export class Engine {
       confidence: "insufficient",
       flags,
       explanation,
-      reasoning_trace: [{ stage: "M8", detail: `internal_error:${excName}` }],
+      reasoning_trace: [{ stage: "M8", detail: "internal_error" }],
       recommended_recheck_min: recheck,
     };
   }

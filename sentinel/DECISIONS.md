@@ -188,6 +188,25 @@ real key management (Ed25519, key custody, revocation, offline verification) is 
 open item in GAPS.md. Unsigned/`none` packages load but set flag
 `content_unsigned` on every output.
 
+## D16b. Boundary hardening (adversarial-review fixes)
+
+- Malformed `unit_profile`/`context` shapes are **normalized identically in
+  both runtimes** at `evaluate()` entry: wrong-typed fields are dropped with
+  flags `invalid_profile_fields`/`invalid_context_fields` (confidence at most
+  degraded) — never crashed on, never silently trusted.
+- `missing_context` is flagged **centrally** on every output path, not only
+  when a signature matched.
+- M1 quarantines non-finite numeric values (`invalid_value:not_finite`) and
+  non-ASCII `obs_id`s (sort/hash parity).
+- M9 recording fails toward caution: unserializable raw inputs are recorded
+  as `{"unserializable_input": true}`; `replay` skips such cases (they cannot
+  be re-executed; their output records stay tamper-evident). `case_id` falls
+  back to a sanitized deterministic hash with an M9 trace note.
+- Emergency outputs carry a stable fault marker only — never runtime-specific
+  exception class names (cross-runtime parity of the fault path).
+- Lone UTF-16 surrogates in any input string canonicalize to U+FFFD in both
+  runtimes.
+
 ## D17. Layout deviation
 
 The spec assumes SENTINEL owns the repo root; this repository already hosts a

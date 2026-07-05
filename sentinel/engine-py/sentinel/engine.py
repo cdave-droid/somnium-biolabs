@@ -85,8 +85,16 @@ class Engine:
             output = self._evaluate_inner(unit_profile or {}, observations or [], context, reference_time)
         except Exception as exc:  # prime directive 2: fail toward caution
             output = self._emergency_output(inputs, exc)
-        self.audit.append("case_input", output["case_id"], ENGINE_VERSION,
-                          self.content["content_version"], inputs)
+        # M9 recording must also fail toward caution: raw caller inputs may be
+        # unserializable (non-finite floats survive json parsing) and must not
+        # make evaluate() throw after the safe output was already built.
+        try:
+            self.audit.append("case_input", output["case_id"], ENGINE_VERSION,
+                              self.content["content_version"], inputs)
+        except (TypeError, ValueError):
+            self.audit.append("case_input", output["case_id"], ENGINE_VERSION,
+                              self.content["content_version"],
+                              {"unserializable_input": True})
         self.audit.append("case_output", output["case_id"], ENGINE_VERSION,
                           self.content["content_version"], {"output": output})
         return output
@@ -119,6 +127,11 @@ class Engine:
                 inp = pending.get(record["case_id"])
                 if inp is None:
                     raise AuditIntegrityError(f"case_output without case_input: {record['case_id']}")
+                if inp["payload"].get("unserializable_input"):
+                    # Inputs could not be recorded canonically, so the case
+                    # cannot be re-executed; the chained output record itself
+                    # remains tamper-evident. Skipped, never silently mutated.
+                    continue
                 if inp["content_version"] != self.content["content_version"]:
                     raise AuditIntegrityError(
                         f"replay requires content {inp['content_version']}, loaded {self.content['content_version']}")
@@ -137,6 +150,11 @@ class Engine:
         flags = set(content["flags"])
         trace = []
         m8_triggers = []
+
+        # Malformed profile/context shapes are normalized identically in both
+        # runtimes (flagged, never crashed on, never silently trusted).
+        unit_profile = _normalize_profile(unit_profile, flags)
+        context = _normalize_context(context, flags)
 
         # M1 — ingest & validate
         accepted, quarantined, notes = m1_ingest.ingest(observations, content, flags)
@@ -251,6 +269,10 @@ class Engine:
 
         floors_table = content["tables"]["floors"]["insufficient_floor_by_deployment"]
         deployment = (context or {}).get("deployment")
+        # Central missing-context flag: absent context/deployment must surface
+        # on EVERY output path, not only when a signature happened to match.
+        if not context or not isinstance(deployment, str) or not deployment:
+            flags.add("missing_context")
         floor_entry = floors_table.get(deployment, floors_table["default"]) if deployment else floors_table["default"]
 
         # Severity: max over matched; floored by content severity floor when M8 fired.
@@ -289,7 +311,8 @@ class Engine:
             confidence = "insufficient"
         elif flags & {"baseline_population_default", "baseline_unavailable", "suspect_inputs_present",
                       "data_rejected", "missing_context", "artifact_suspected_any_input",
-                      "artifact_with_mechanism", "duplicate_obs_id", "baseline_zero_division"} or quality_ne:
+                      "artifact_with_mechanism", "duplicate_obs_id", "baseline_zero_division",
+                      "invalid_profile_fields", "invalid_context_fields"} or quality_ne:
             confidence = "degraded"
         else:
             confidence = "high"
@@ -326,11 +349,18 @@ class Engine:
         if m8_active:
             trace.append({"stage": "M8", "detail": "triggers: " + ",".join(sorted(set(m8_triggers)))})
 
-        case_id = deterministic_uuid({
-            "unit_profile": unit_profile, "observations": observations, "context": context,
-            "reference_time": reference_time_arg, "engine_version": ENGINE_VERSION,
-            "content_version": content["content_version"],
-        })
+        try:
+            case_id = deterministic_uuid({
+                "unit_profile": unit_profile, "observations": observations, "context": context,
+                "reference_time": reference_time_arg, "engine_version": ENGINE_VERSION,
+                "content_version": content["content_version"],
+            })
+        except (TypeError, ValueError):
+            trace.append({"stage": "M9", "detail": "case_id derived from sanitized inputs (raw inputs not canonically serializable)"})
+            case_id = deterministic_uuid({"unserializable_input": True,
+                                          "observation_count": len(observations),
+                                          "engine_version": ENGINE_VERSION,
+                                          "content_version": content["content_version"]})
         return {
             "case_id": case_id,
             "engine_version": ENGINE_VERSION,
@@ -377,11 +407,13 @@ class Engine:
             case_id = deterministic_uuid({**inputs, "engine_version": ENGINE_VERSION,
                                           "content_version": content["content_version"]})
         except Exception:
-            case_id = deterministic_uuid({"unserializable_input": type(exc).__name__})
+            case_id = deterministic_uuid({"unserializable_input": True})
         recheck = content["tables"]["recheck_intervals"]["by_tier"][tier]
+        # Exception class names are runtime-specific; the deterministic output
+        # carries a stable fault marker only (details belong in ops logs).
         explanation = (
-            "ENGINE COULD NOT FULLY EVALUATE THIS CASE: an internal error occurred during evaluation"
-            f" ({type(exc).__name__}). Action tier {tier} is the maximum configured safe floor,"
+            "ENGINE COULD NOT FULLY EVALUATE THIS CASE: an internal error occurred during evaluation."
+            f" Action tier {tier} is the maximum configured safe floor,"
             " not a confident assessment. Most valuable next input: none — this is an engine fault;"
             " escalate per the floor tier and report the fault."
         )
@@ -402,9 +434,105 @@ class Engine:
             "confidence": "insufficient",
             "flags": flags,
             "explanation": explanation,
-            "reasoning_trace": [{"stage": "M8", "detail": f"internal_error:{type(exc).__name__}"}],
+            "reasoning_trace": [{"stage": "M8", "detail": "internal_error"}],
             "recommended_recheck_min": recheck,
         }
+
+
+def _is_num(v):
+    return isinstance(v, (int, float)) and not isinstance(v, bool)
+
+
+def _str_list(v):
+    if not isinstance(v, list):
+        return None
+    return [x for x in v if isinstance(x, str)]
+
+
+def _normalize_profile(profile, flags):
+    """Coerce a malformed unit profile to a safe shape (DECISIONS D12/GAPS A5
+    class). Dropped fields are flagged — never trusted, never crashed on."""
+    if not isinstance(profile, dict):
+        flags.add("invalid_profile_fields")
+        return {}
+    out = {}
+    dropped = False
+    for key, value in profile.items():
+        if not isinstance(key, str):
+            dropped = True
+            continue
+        if key in ("known_conditions", "active_mitigations", "incompatibilities"):
+            cleaned = _str_list(value)
+            if cleaned is None:
+                dropped = True
+                continue
+            if len(cleaned) != len(value):
+                dropped = True
+            out[key] = cleaned
+        elif key in ("service_age_years", "mass_kg"):
+            if _is_num(value):
+                out[key] = value
+            else:
+                dropped = True
+        elif key == "baselines":
+            if not isinstance(value, dict):
+                dropped = True
+                continue
+            cleaned_b = {}
+            for metric, b in value.items():
+                if (isinstance(metric, str) and isinstance(b, dict)
+                        and all(_is_num(b.get(f)) for f in ("median", "p10", "p90", "n_obs"))):
+                    cleaned_b[metric] = b
+                else:
+                    dropped = True
+            out[key] = cleaned_b
+        elif key in ("unit_id", "class"):
+            if isinstance(value, str):
+                out[key] = value
+            else:
+                dropped = True
+        else:
+            out[key] = value
+    if dropped:
+        flags.add("invalid_profile_fields")
+    return out
+
+
+def _normalize_context(context, flags):
+    if context is None:
+        return None
+    if not isinstance(context, dict):
+        flags.add("invalid_context_fields")
+        return None
+    out = {}
+    dropped = False
+    for key, value in context.items():
+        if key in ("deployment", "operator_skill", "connectivity"):
+            if isinstance(value, str):
+                out[key] = value
+            else:
+                dropped = True
+        elif key == "time_to_service_min":
+            if isinstance(value, dict):
+                cleaned = {k: v for k, v in value.items() if isinstance(k, str) and _is_num(v)}
+                if len(cleaned) != len(value):
+                    dropped = True
+                out[key] = cleaned
+            else:
+                dropped = True
+        elif key == "resources":
+            cleaned = _str_list(value)
+            if cleaned is None:
+                dropped = True
+            else:
+                if len(cleaned) != len(value):
+                    dropped = True
+                out[key] = cleaned
+        else:
+            out[key] = value
+    if dropped:
+        flags.add("invalid_context_fields")
+    return out
 
 
 def _breaches(bound, value, enums):

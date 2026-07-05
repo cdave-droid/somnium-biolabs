@@ -36,6 +36,11 @@ def ingest(observations, content, flags):
         if not isinstance(obs_id, str) or not obs_id:
             _quarantine(quarantined, obs, "invalid_structure:obs_id")
             continue
+        if not obs_id.isascii():
+            # ASCII-only ids keep the (timestamp, obs_id) tie-break sort and
+            # canonical hashing byte-identical across runtimes.
+            _quarantine(quarantined, obs, "invalid_structure:obs_id_not_ascii")
+            continue
         if obs_id in seen_ids:
             _quarantine(quarantined, obs, "duplicate_obs_id")
             flags.add("duplicate_obs_id")
@@ -93,6 +98,12 @@ def ingest(observations, content, flags):
         elif otype in NUMERIC_TYPES:
             if isinstance(value, bool) or not isinstance(value, (int, float)):
                 _quarantine(quarantined, obs, "invalid_value:not_numeric")
+                continue
+            if value != value or value in (float("inf"), float("-inf")):
+                # NaN passes < / > bounds comparisons; it must never reach
+                # feature math or the audit log.
+                _quarantine(quarantined, obs, "invalid_value:not_finite")
+                flags.add("data_rejected")
                 continue
             unit = obs.get("unit")
             canonical_unit = units_table["canonical"].get(otype)

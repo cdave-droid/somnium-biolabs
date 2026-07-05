@@ -89,6 +89,12 @@ export function ingest(
       quarantine(quarantined, obs, "invalid_structure:obs_id");
       continue;
     }
+    if (!/^[\x00-\x7f]*$/.test(obsId)) {
+      // ASCII-only ids keep the (timestamp, obs_id) tie-break sort and
+      // canonical hashing byte-identical across runtimes.
+      quarantine(quarantined, obs, "invalid_structure:obs_id_not_ascii");
+      continue;
+    }
     if (seenIds.has(obsId)) {
       quarantine(quarantined, obs, "duplicate_obs_id");
       flags.add("duplicate_obs_id");
@@ -156,6 +162,13 @@ export function ingest(
     } else if (NUMERIC_TYPES.includes(otype)) {
       if (typeof value !== "number") {
         quarantine(quarantined, obs, "invalid_value:not_numeric");
+        continue;
+      }
+      if (!Number.isFinite(value)) {
+        // NaN passes < / > bounds comparisons; it must never reach
+        // feature math or the audit log.
+        quarantine(quarantined, obs, "invalid_value:not_finite");
+        flags.add("data_rejected");
         continue;
       }
       const unit = obs.unit;

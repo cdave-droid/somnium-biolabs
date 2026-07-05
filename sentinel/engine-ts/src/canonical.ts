@@ -73,11 +73,25 @@ function escapeStr(s: string): string {
   let out = "";
   for (let i = 0; i < s.length; i++) {
     const ch = s[i];
+    const code = s.charCodeAt(i);
     const esc = ESCAPES[ch];
     if (esc !== undefined) {
       out += esc;
-    } else if (ch.charCodeAt(0) < 0x20) {
-      out += "\\u" + ch.charCodeAt(0).toString(16).padStart(4, "0");
+    } else if (code < 0x20) {
+      out += "\\u" + code.toString(16).padStart(4, "0");
+    } else if (code >= 0xd800 && code <= 0xdbff) {
+      // High surrogate: keep only if properly paired (a real astral char);
+      // a LONE surrogate is replaced with U+FFFD in BOTH runtimes so UTF-8
+      // encoding never throws and canonical bytes stay identical.
+      const next = i + 1 < s.length ? s.charCodeAt(i + 1) : 0;
+      if (next >= 0xdc00 && next <= 0xdfff) {
+        out += ch + s[i + 1];
+        i += 1;
+      } else {
+        out += "\ufffd";
+      }
+    } else if (code >= 0xdc00 && code <= 0xdfff) {
+      out += "\ufffd"; // lone low surrogate
     } else {
       out += ch;
     }

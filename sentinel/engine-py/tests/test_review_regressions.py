@@ -68,6 +68,90 @@ def test_hostile_deployment_on_m8_floor_path(content):
         assert out["action_tier"] == "D3"
 
 
+def test_non_finite_values_quarantined_and_evaluate_never_throws(content):
+    """Findings: NaN passed M1 bounds comparisons, and Infinity in the raw
+    inputs made audit.append throw OUT of evaluate() after the safe output
+    was built."""
+    from sentinel import Engine as E
+    eng = E(content)
+    obs = [
+        {**make_obs(0, "cycle_rate", 80, 10)},
+        {**make_obs(1, "cycle_rate", float("nan"), 11)},
+        {**make_obs(2, "temperature_c", float("inf"), 11)},
+    ]
+    out = eng.evaluate({"unit_id": "u-1"}, obs, {"deployment": "fixed_site"})
+    assert "internal_error" not in out["flags"]
+    assert "data_rejected" in out["flags"]
+    reasons = [t["detail"] for t in out["reasoning_trace"] if "not_finite" in t["detail"]]
+    assert len(reasons) == 2
+    # audit recorded despite unserializable raw inputs; chain verifies
+    from sentinel import verify_chain
+    verify_chain(eng.audit.records)
+    assert eng.audit.records[0]["payload"] == {"unserializable_input": True}
+    # replay skips the unreproducible case rather than crashing
+    assert E(content).replay(eng.audit.records) == []
+
+
+def test_non_ascii_obs_id_quarantined(content):
+    out = Engine(content).evaluate(
+        {"unit_id": "u-1"},
+        [{**make_obs(0, "cycle_rate", 80, 10), "obs_id": "obs-\U0001f600"},
+         make_obs(1, "cycle_rate", 82, 10, 30)],
+        {"deployment": "fixed_site"})
+    assert any("obs_id_not_ascii" in t["detail"] for t in out["reasoning_trace"])
+    assert "internal_error" not in out["flags"]
+
+
+def test_malformed_profile_and_context_are_normalized_not_fatal(content):
+    """Finding: null known_conditions crashed Python (emergency output) while
+    TS silently continued — a cross-runtime divergence AND an availability
+    hole. Both now normalize identically with flags."""
+    profile = {"unit_id": "u-1", "known_conditions": None, "service_age_years": "old",
+               "baselines": "not-a-dict"}
+    out = Engine(content).evaluate(profile, [make_obs(0, "cycle_rate", 80, 10)], "not-a-context")
+    assert "internal_error" not in out["flags"]
+    assert "invalid_profile_fields" in out["flags"]
+    assert "invalid_context_fields" in out["flags"]
+    assert "missing_context" in out["flags"]
+    assert out["confidence"] == "degraded"
+
+
+def test_missing_context_flagged_on_no_match_path(content):
+    """Finding: missing_context was only set for MATCHED signatures, so a
+    healthy no-match case with no context reported confidence 'high'."""
+    out = Engine(content).evaluate({"unit_id": "u-1"}, [make_obs(0, "cycle_rate", 72, 10)], None)
+    assert out["matched_signatures"] == []
+    assert "missing_context" in out["flags"]
+    assert out["confidence"] == "degraded"
+
+
+def test_lone_surrogate_in_note_does_not_crash(content):
+    obs = [make_obs(0, "cycle_rate", 80, 10),
+           make_obs(1, "free_text_note", "bad \udc80 char", 10, 5)]
+    eng = Engine(content)
+    out = eng.evaluate({"unit_id": "u-1"}, obs, {"deployment": "fixed_site"})
+    assert "internal_error" not in out["flags"]
+    from sentinel import verify_chain
+    verify_chain(eng.audit.records)
+
+
+def test_emergency_output_carries_no_runtime_specific_names(content, monkeypatch):
+    """Finding: the emergency output embedded Python/JS exception class names,
+    breaking cross-runtime byte parity of the fault path."""
+    import sentinel.engine as eng_mod
+
+    def boom(*_a, **_k):
+        raise ValueError("injected")
+
+    monkeypatch.setattr(eng_mod.m5_signatures, "evaluate_signatures", boom)
+    out = Engine(content).evaluate({"unit_id": "u-1"},
+                                   [make_obs(0, "cycle_rate", 80, 10)],
+                                   {"deployment": "fixed_site"})
+    assert out["confidence"] == "insufficient"
+    assert "ValueError" not in out["explanation"]
+    assert out["reasoning_trace"] == [{"stage": "M8", "detail": "internal_error"}]
+
+
 def test_hostile_known_conditions_do_not_crash(content):
     """Finding (TS): mechanism_map['constructor'] resolved to a function and
     threw. Hostile profile strings must be inert."""
