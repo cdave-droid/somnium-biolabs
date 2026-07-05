@@ -1,7 +1,7 @@
 /** M3 — Unit-State Model. Baseline resolution per DECISIONS.md D8:
  * profile-provided → computed-from-history → population default → unavailable.
  */
-import { fmtVal, pyTruthy } from "./canonical.js";
+import { fmtVal, own, pyTruthy } from "./canonical.js";
 import type { ContentHandle } from "./content.js";
 import type { NormalizedObs } from "./m1_ingest.js";
 import { median, percentile } from "./stats.js";
@@ -40,13 +40,13 @@ function populationLookup(popTable: any, unitProfile: any, metric: string): any 
   const klass = unitProfile?.class ?? null;
   for (const entry of popTable.defaults) {
     const m = entry.match;
-    if ("class" in m && m.class !== klass) {
+    if (own(m, "class") && m.class !== klass) {
       continue;
     }
-    if ("age_band" in m && m.age_band !== band) {
+    if (own(m, "age_band") && m.age_band !== band) {
       continue;
     }
-    if (metric in entry.baselines) {
+    if (own(entry.baselines, metric)) {
       const b = entry.baselines[metric];
       return { median: b.median, p10: b.p10, p90: b.p90, n_obs: 0 };
     }
@@ -70,7 +70,7 @@ export function computeBaselines(
   const baselines: Record<string, Baseline> = {};
   for (const metric of Array.from(neededMetrics).sort()) {
     const profBaselines = unitProfile?.baselines;
-    const prof = pyTruthy(profBaselines) ? profBaselines[metric] : undefined;
+    const prof = pyTruthy(profBaselines) && own(profBaselines, metric) ? profBaselines[metric] : undefined;
     if (pyTruthy(prof) && req(prof, "n_obs") >= cfg.min_n_obs) {
       baselines[metric] = {
         median: req(prof, "median"), p10: req(prof, "p10"), p90: req(prof, "p90"),

@@ -2,7 +2,7 @@
  * M5, plus content-rule trajectory classification. Refuses to emit a slope
  * from fewer than min_points (§3 M4).
  */
-import { fmtVal, q6 } from "./canonical.js";
+import { fmtVal, own, q6 } from "./canonical.js";
 import type { ContentHandle } from "./content.js";
 import type { NormalizedObs } from "./m1_ingest.js";
 import { median, olsSlope } from "./stats.js";
@@ -30,7 +30,7 @@ export class Features {
         continue;
       }
       let point: Point;
-      if (o.type in this.enums) {
+      if (own(this.enums, o.type)) {
         const idx = this.enums[o.type].indexOf(o.value as string);
         point = [o.ts, idx, o.value as string];
       } else {
@@ -46,7 +46,7 @@ export class Features {
   }
 
   ordinalIndex(metric: string, label: unknown): number | null {
-    const order = this.enums[metric];
+    const order = own(this.enums, metric) ? this.enums[metric] : undefined;
     if (order === undefined || typeof label !== "string" || !order.includes(label)) {
       return null;
     }

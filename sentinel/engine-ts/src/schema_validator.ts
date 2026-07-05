@@ -65,7 +65,7 @@ function resolveRef(ref: string, root: Record<string, Json>): Record<string, Jso
   }
   let node: Json = root as Json;
   for (const part of ref.slice(2).split("/")) {
-    if (!isPlainObject(node) || !(part in node)) {
+    if (!isPlainObject(node) || !Object.prototype.hasOwnProperty.call(node, part)) {
       throw new Error(`unresolvable $ref: ${ref}`);
     }
     node = node[part];
@@ -201,7 +201,7 @@ export function validate(
   if (isPlainObject(instance)) {
     const required = (schema["required"] as string[] | undefined) ?? [];
     for (const req of required) {
-      if (!(req in instance)) {
+      if (!Object.prototype.hasOwnProperty.call(instance, req)) {
         errors.push(`${path}: missing required field '${req}'`);
       }
     }
@@ -209,7 +209,7 @@ export function validate(
     const addl = "additionalProperties" in schema ? schema["additionalProperties"] : true;
     for (const key of Object.keys(instance)) {
       const val = instance[key];
-      if (key in props) {
+      if (Object.prototype.hasOwnProperty.call(props, key)) {
         errors.push(...validate(val, props[key] as Record<string, Json>, root, `${path}.${key}`));
       } else if (addl === false) {
         errors.push(`${path}: unknown field '${key}'`);

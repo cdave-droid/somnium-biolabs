@@ -3,7 +3,7 @@
  * Faithful port of engine-py/sentinel/engine.py — every output string is
  * byte-identical.
  */
-import { canonicalJson, deterministicUuid, fmtNum, pyTruthy } from "./canonical.js";
+import { canonicalJson, deterministicUuid, fmtNum, own, ownGet, pyTruthy } from "./canonical.js";
 import { ENGINE_VERSION, FLAG_TEXTS, SEV_ORD, TIER_ORD, TRAJ_ORD } from "./constants.js";
 import type { ContentHandle } from "./content.js";
 import { walkConditions } from "./content.js";
@@ -118,7 +118,7 @@ function breaches(bound: any, value: unknown, enums: Record<string, string[]>): 
   const metric = bound.metric;
   let v: number;
   let t: number;
-  if (metric in enums) {
+  if (own(enums, metric)) {
     if (typeof value !== "string" || !enums[metric].includes(value)) {
       return false;
     }
@@ -403,7 +403,7 @@ export class Engine {
     const floorsTable = content.tables["floors"].insufficient_floor_by_deployment;
     const deployment = context?.deployment ?? null;
     const floorEntry = pyTruthy(deployment)
-      ? (floorsTable[deployment] ?? floorsTable.default)
+      ? (ownGet(floorsTable, deployment) ?? floorsTable.default)
       : floorsTable.default;
 
     // Severity: max over matched; floored by content severity floor when M8 fired.

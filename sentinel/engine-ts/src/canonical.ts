@@ -131,6 +131,22 @@ export function deterministicUuid(value: unknown): string {
   return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20, 32)}`;
 }
 
+/** Own-property membership — the TS equivalent of Python's dict `in`.
+ * MANDATORY for any lookup keyed by a caller- or content-controlled string:
+ * bare `key in obj` / `obj[key]` walk the prototype chain, so hostile keys
+ * like "constructor" or "__proto__" resolve to inherited members and can
+ * silently corrupt tier lookups (under-triage) or crash the engine. */
+export function own(obj: unknown, key: string): boolean {
+  return (
+    typeof obj === "object" && obj !== null && Object.prototype.hasOwnProperty.call(obj, key)
+  );
+}
+
+/** Own-property read: `obj[key]` if own, else undefined. */
+export function ownGet(obj: any, key: string): any {
+  return own(obj, key) ? obj[key] : undefined;
+}
+
 /** Python truthiness (`bool(x)` / `or` semantics) for ported call sites:
  * false for false, 0/-0, "", null/undefined, empty array, empty plain object.
  * NaN is truthy, exactly as in Python. */

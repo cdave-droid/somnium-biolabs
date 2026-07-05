@@ -1,0 +1,19 @@
+{
+  "unit_profile": {
+    "unit_id": "u-005"
+  },
+  "observations": [
+    {
+      "obs_id": "o000",
+      "unit_id": "u-001",
+      "timestamp": "2026-07-03T13:00:00Z",
+      "type": "responsiveness",
+      "source": "manual_entry",
+      "value": "R3"
+    }
+  ],
+  "context": {
+    "deployment": "constructor"
+  },
+  "reference_time": null
+}

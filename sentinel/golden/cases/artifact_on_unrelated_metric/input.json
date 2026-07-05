@@ -1,0 +1,50 @@
+{
+  "unit_profile": {
+    "unit_id": "u-004"
+  },
+  "observations": [
+    {
+      "obs_id": "o000",
+      "unit_id": "u-001",
+      "timestamp": "2026-07-03T13:00:00Z",
+      "type": "saturation_pct",
+      "source": "fixed_monitor",
+      "value": 82
+    },
+    {
+      "obs_id": "o001",
+      "unit_id": "u-001",
+      "timestamp": "2026-07-03T13:30:00Z",
+      "type": "saturation_pct",
+      "source": "fixed_monitor",
+      "value": 82
+    },
+    {
+      "obs_id": "o002",
+      "unit_id": "u-001",
+      "timestamp": "2026-07-03T13:00:00Z",
+      "type": "mass_kg",
+      "source": "fixed_monitor",
+      "value": 70
+    },
+    {
+      "obs_id": "o003",
+      "unit_id": "u-001",
+      "timestamp": "2026-07-03T13:01:00Z",
+      "type": "mass_kg",
+      "source": "fixed_monitor",
+      "value": 80
+    }
+  ],
+  "context": {
+    "deployment": "fixed_site",
+    "operator_skill": "engineer",
+    "time_to_service_min": {
+      "self_service": 5,
+      "on_site": 5,
+      "recovery": 60
+    },
+    "connectivity": "online"
+  },
+  "reference_time": null
+}

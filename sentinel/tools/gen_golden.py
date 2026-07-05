@@ -140,6 +140,24 @@ CASES = {
         "assert": {"severity": "S4", "action_tier": "D5",
                    "matched_signatures": ["low_saturation_critical_v1"]},
     },
+    "artifact_on_unrelated_metric": {
+        "input": {"unit_profile": {"unit_id": "u-004"},
+                  "observations": [O(0, "saturation_pct", 82, "2026-07-03T13:00:00Z"),
+                                   O(1, "saturation_pct", 82, "2026-07-03T13:30:00Z"),
+                                   O(2, "mass_kg", 70, "2026-07-03T13:00:00Z"),
+                                   O(3, "mass_kg", 80, "2026-07-03T13:01:00Z")],
+                  "context": FIXED, "reference_time": None},
+        "assert": {"severity": "S4", "action_tier": "D5",
+                   "matched_signatures": ["low_saturation_critical_v1"],
+                   "confidence": "degraded"},  # mass artifact must not veto the sat match
+    },
+    "hostile_deployment_defaults": {
+        "input": {"unit_profile": {"unit_id": "u-005"},
+                  "observations": [O(0, "responsiveness", "R3", "2026-07-03T13:00:00Z", source="manual_entry")],
+                  "context": {"deployment": "constructor"}, "reference_time": None},
+        "assert": {"severity": "S4", "action_tier": "D5",
+                   "matched_signatures": ["unresponsive_unit_v1"]},  # default tier, prototype keys inert
+    },
     # -- healthy path ----------------------------------------------------
     "healthy_stable": {
         "input": {"unit_profile": PROFILE,

@@ -37,7 +37,8 @@ def random_case(rng: random.Random) -> dict:
         profile["class"] = rng.choice(["M", "F", "X"])
     if rng.random() < 0.4:
         profile["known_conditions"] = rng.sample(
-            ["reduced_capacity", "intermittent_cycling", "throttled_mode", "other_condition"], rng.randint(1, 2))
+            ["reduced_capacity", "intermittent_cycling", "throttled_mode", "other_condition",
+             "constructor", "__proto__"], rng.randint(1, 2))
     if rng.random() < 0.5:
         profile["baselines"] = {
             "cycle_rate": {"median": rng.randint(55, 95), "p10": 50, "p90": 100,
@@ -87,7 +88,13 @@ def random_case(rng: random.Random) -> dict:
     if rng.random() < 0.9:
         context = {}
         if rng.random() < 0.9:
-            context["deployment"] = rng.choice(DEPLOYMENTS)
+            # 10% hostile: prototype-chain key names must be inert (see
+            # test_review_regressions.py) and byte-identical across runtimes.
+            if rng.random() < 0.1:
+                context["deployment"] = rng.choice(
+                    ["constructor", "toString", "__proto__", "hasOwnProperty", "valueOf"])
+            else:
+                context["deployment"] = rng.choice(DEPLOYMENTS)
         if rng.random() < 0.7:
             context["operator_skill"] = rng.choice(["untrained", "basic", "technician", "engineer"])
         if rng.random() < 0.8:

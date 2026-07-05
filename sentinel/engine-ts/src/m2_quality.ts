@@ -2,7 +2,7 @@
  * content files. Never deletes data — annotates quality and lets downstream
  * modules weight it (DECISIONS.md D7).
  */
-import { pyTruthy } from "./canonical.js";
+import { own, pyTruthy } from "./canonical.js";
 import { NUMERIC_TYPES } from "./constants.js";
 import type { ContentHandle } from "./content.js";
 import type { NormalizedObs } from "./m1_ingest.js";
@@ -49,7 +49,7 @@ function reqHolds(req: any, value: any, enums: any): boolean {
   }
   let a: any;
   let b: any;
-  if (req.metric in enums) {
+  if (own(enums, req.metric)) {
     const order: any[] = enums[req.metric];
     if (!order.includes(value) || !order.includes(req.value)) {
       return false;
@@ -189,8 +189,9 @@ export function assess(
   ]);
   const protectedBy: Record<string, string> = {};
   for (const mech of Array.from(mechanisms).sort()) {
-    for (const metric of (rules.mechanism_map[mech] ?? []) as string[]) {
-      if (!(metric in protectedBy)) {
+    const mapped = own(rules.mechanism_map, mech) ? (rules.mechanism_map[mech] as string[]) : [];
+    for (const metric of mapped) {
+      if (!own(protectedBy, metric)) {
         protectedBy[metric] = mech;
       }
     }
@@ -199,11 +200,11 @@ export function assess(
   const artifactMetrics = new Set<string>();
   const protectedMetrics = new Set<string>();
   for (const o of accepted) {
-    if (!NUMERIC_TYPES.includes(o.type) && !(o.type in enums)) {
+    if (!NUMERIC_TYPES.includes(o.type) && !own(enums, o.type)) {
       continue;
     }
     if (o.quality === "artifact_likely") {
-      if (o.type in protectedBy) {
+      if (own(protectedBy, o.type)) {
         o.mechanism_protected = true;
         protectedMetrics.add(o.type);
         flags.add("artifact_with_mechanism");

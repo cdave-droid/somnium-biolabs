@@ -86,6 +86,46 @@ test("audit chain verifies and detects tampering; replay is byte-identical", () 
   assert.throws(() => verifyChain(tampered));
 });
 
+test("regression: artifact on unrelated metric cannot veto critical signature", () => {
+  const observations = [
+    obs(0, "saturation_pct", 82, "2026-07-03T13:00:00Z"),
+    obs(1, "saturation_pct", 82, "2026-07-03T13:30:00Z"),
+    obs(2, "mass_kg", 70, "2026-07-03T13:00:00Z"),
+    obs(3, "mass_kg", 80, "2026-07-03T13:01:00Z"), // impossible jump -> artifact
+  ];
+  const out = new Engine(content).evaluate({ unit_id: "u-1" }, observations, { deployment: "fixed_site" });
+  assert.deepEqual(out.matched_signatures, ["low_saturation_critical_v1"]);
+  assert.equal(out.severity, "S4");
+  assert.equal(out.action_tier, "D5");
+  assert.equal(out.confidence, "degraded");
+});
+
+test("regression: hostile prototype keys are inert", () => {
+  const r3 = [obs(0, "responsiveness", "R3", "2026-07-03T13:00:00Z", "manual_entry")];
+  for (const deployment of ["constructor", "toString", "__proto__", "hasOwnProperty"]) {
+    const out = new Engine(content).evaluate({ unit_id: "u-1" }, r3, { deployment });
+    assert.equal(out.action_tier, "D5", deployment); // default tier map entry
+    assert.ok(out.flags.includes("context_default_tier"), deployment);
+  }
+  // M8 floor path must not throw with a hostile deployment
+  const m8 = new Engine(content).evaluate({ unit_id: "u-1" }, [], { deployment: "constructor" });
+  assert.equal(m8.confidence, "insufficient");
+  assert.equal(m8.action_tier, "D3");
+  // hostile known_conditions must not mechanism-protect or crash
+  const spiky = [
+    obs(0, "saturation_pct", 97, "2026-07-03T10:00:00Z"),
+    obs(1, "saturation_pct", 60, "2026-07-03T10:00:30Z"),
+    obs(2, "saturation_pct", 96, "2026-07-03T10:01:00Z"),
+  ];
+  const out = new Engine(content).evaluate(
+    { unit_id: "u-1", known_conditions: ["constructor", "__proto__"], active_mitigations: ["toString"] },
+    spiky,
+    { deployment: "fixed_site" },
+  );
+  assert.ok(!out.flags.includes("artifact_with_mechanism"));
+  assert.ok(!out.flags.includes("internal_error"));
+});
+
 test("stream equals batch; duplicates flagged", () => {
   const eng = new Engine(content);
   const handle = eng.openCase(PROFILE, CONTEXT);

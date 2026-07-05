@@ -3,7 +3,7 @@
  * not_evaluable rather than silently unmatched. All matches recorded;
  * conflicts resolved by explicit precedence with losers logged.
  */
-import { fmtVal, q6 } from "./canonical.js";
+import { fmtVal, own, ownGet, q6 } from "./canonical.js";
 import { SEV_ORD } from "./constants.js";
 import type { ContentHandle } from "./content.js";
 import type { Baseline } from "./m3_state.js";
@@ -62,10 +62,18 @@ function store(ctx: EvalCtx, cond: any, values: Record<string, unknown>): void {
 function evalLeaf(cond: any, ctx: EvalCtx): string {
   const f = ctx.features;
   if ("flag" in cond) {
-    return ctx.sigFlags.has(cond.flag) || ctx.caseFlags.has(cond.flag) ? TRUE : FALSE;
+    const name = cond.flag;
+    if (name === "artifact_suspected_any_input") {
+      // Scoped strictly to this signature's required inputs — the
+      // case-level copy of this flag must never veto a signature whose
+      // own inputs are clean (an unrelated sensor glitch would
+      // otherwise suppress a critical match).
+      return ctx.sigFlags.has(name) ? TRUE : FALSE;
+    }
+    return ctx.sigFlags.has(name) || ctx.caseFlags.has(name) ? TRUE : FALSE;
   }
   if ("baseline_status" in cond && !("op" in cond)) {
-    const b = ctx.baselines[cond.metric];
+    const b = ownGet(ctx.baselines, cond.metric);
     const status = b !== undefined ? b.status : "unavailable";
     return status === cond.baseline_status ? TRUE : FALSE;
   }
@@ -88,7 +96,7 @@ function evalLeaf(cond: any, ctx: EvalCtx): string {
     const raw = latest[1];
     const display = latest[2] !== null ? latest[2] : latest[1];
     let target = cond.value;
-    if (metric in f.enums) {
+    if (own(f.enums, metric)) {
       target = f.ordinalIndex(metric, target);
       if (target === null) {
         ctx.unknownReasons.push(`bad_ordinal_target:${metric}`);
@@ -101,7 +109,7 @@ function evalLeaf(cond: any, ctx: EvalCtx): string {
   }
 
   if (op === "delta_from_baseline_abs" || op === "delta_from_baseline_pct") {
-    const b = ctx.baselines[metric];
+    const b = ownGet(ctx.baselines, metric);
     if (b === undefined || b.status === "unavailable") {
       ctx.unknownReasons.push(`no_baseline:${metric}`);
       return UNKNOWN;
@@ -255,7 +263,7 @@ export function evaluateSignatures(
 
     if (sig.requires_personalized_baseline) {
       const degraded = sig.required_inputs.filter(
-        (m: string) => m in baselines && baselines[m].status !== "personalized",
+        (m: string) => own(baselines, m) && baselines[m].status !== "personalized",
       );
       if (degraded.length > 0) {
         const reason = "personalized_baseline_required:" + [...degraded].sort().join(",");

@@ -2,7 +2,7 @@
  * structurally invalid, physically impossible, or outside the controlled
  * vocabularies. Bounds and unit conversions are content, not code.
  */
-import { q6 } from "./canonical.js";
+import { own, q6 } from "./canonical.js";
 import { NUMERIC_TYPES, OBSERVATION_TYPES } from "./constants.js";
 import type { ContentHandle } from "./content.js";
 import { parseTs } from "./timeutil.js";
@@ -147,7 +147,7 @@ export function ingest(
     }
 
     let value = obs.value;
-    if (otype in enums) {
+    if (own(enums, otype)) {
       if (!enums[otype].includes(value)) {
         quarantine(quarantined, obs, `invalid_value:${pyStrOpt(value)}`);
         continue;

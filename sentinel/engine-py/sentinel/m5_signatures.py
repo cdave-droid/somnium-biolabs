@@ -46,7 +46,14 @@ def _store(ctx, cond, values):
 def _eval_leaf(cond, ctx):
     f = ctx.features
     if "flag" in cond:
-        return TRUE if cond["flag"] in ctx.sig_flags or cond["flag"] in ctx.case_flags else FALSE
+        name = cond["flag"]
+        if name == "artifact_suspected_any_input":
+            # Scoped strictly to this signature's required inputs — the
+            # case-level copy of this flag must never veto a signature whose
+            # own inputs are clean (an unrelated sensor glitch would
+            # otherwise suppress a critical match).
+            return TRUE if name in ctx.sig_flags else FALSE
+        return TRUE if name in ctx.sig_flags or name in ctx.case_flags else FALSE
     if "baseline_status" in cond and "op" not in cond:
         b = ctx.baselines.get(cond["metric"])
         status = b["status"] if b else "unavailable"

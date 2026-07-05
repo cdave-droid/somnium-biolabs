@@ -3,13 +3,14 @@
  * the safety invariant is structural: everything here contributes floors to
  * a max() in M7 (DECISIONS.md D10).
  */
+import { own, ownGet } from "./canonical.js";
 import { SEV_ORD } from "./constants.js";
 import type { ContentHandle } from "./content.js";
 
 export function dottedGet(obj: any, path: string): unknown {
   let node = obj;
   for (const part of path.split(".")) {
-    if (node === null || typeof node !== "object" || Array.isArray(node) || !(part in node)) {
+    if (node === null || typeof node !== "object" || Array.isArray(node) || !own(node, part)) {
       return null;
     }
     node = node[part];
@@ -34,8 +35,8 @@ export function signatureTier(
     return tier;
   }
   let tier: string;
-  if (deployment in tierMap) {
-    tier = tierMap[deployment];
+  if (own(tierMap, deployment)) {
+    tier = ownGet(tierMap, deployment);
     trace.push({ stage: "M6", detail: `${sig.signature_id}: ${deployment} -> ${tier}` });
   } else {
     flags.add("context_default_tier");

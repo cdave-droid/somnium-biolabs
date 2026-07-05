@@ -178,7 +178,8 @@ def test_delta_ops_and_baseline_conditions(content):
 
 def test_flag_condition_scoped_to_signature_inputs(content):
     """An artifact on an UNRELATED metric must not veto a signature that
-    excludes artifact_suspected_any_input."""
+    excludes artifact_suspected_any_input — even when the case-level flag set
+    already carries the flag (which M2 sets globally in the real pipeline)."""
     from sentinel.m5_signatures import evaluate_signatures
     sig = _sig({"all_of": [
         {"metric": "cycle_rate", "op": "gte", "value": 100, "window_min": 240},
@@ -186,9 +187,10 @@ def test_flag_condition_scoped_to_signature_inputs(content):
     handle = dict(content)
     handle["published_signatures"] = [sig]
     f = _features(content, [make_obs(0, "cycle_rate", 120, 13)])
-    res = evaluate_signatures(handle, f, {}, {"saturation_pct"}, set(), [])
+    case_flags = {"artifact_suspected_any_input"}  # as M2 sets it globally
+    res = evaluate_signatures(handle, f, {}, {"saturation_pct"}, case_flags, [])
     assert len(res["matched"]) == 1
-    res = evaluate_signatures(handle, f, {}, {"cycle_rate"}, set(), [])
+    res = evaluate_signatures(handle, f, {}, {"cycle_rate"}, case_flags, [])
     assert res["not_matched"] == ["t_sig_v1"]
 
 
