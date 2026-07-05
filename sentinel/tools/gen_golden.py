@@ -119,6 +119,15 @@ CASES = {
         "assert": {"severity": "S3", "action_tier": "D5", "matched_signatures": ["reserve_depletion_v1"],
                    "trajectory": "worsening"},  # D4 context tier promoted to D5 by remote-recovery modifier (2880 min)
     },
+    "reserve_depletion_fixed_site": {
+        "input": {"unit_profile": PROFILE,
+                  "observations": [O(i, "reserve_level", v, ts, source="inline_gauge") for i, (ts, v) in enumerate(
+                      [("2026-07-03T02:00:00Z", 40), ("2026-07-03T05:00:00Z", 34),
+                       ("2026-07-03T08:00:00Z", 30), ("2026-07-03T11:00:00Z", 25),
+                       ("2026-07-03T13:00:00Z", 21)])],
+                  "context": FIXED, "reference_time": None},
+        "assert": {"severity": "S3", "action_tier": "D3", "matched_signatures": ["reserve_depletion_v1"]},
+    },
     "population_baseline_degraded": {
         "input": {"unit_profile": {"unit_id": "u-002", "service_age_years": 72, "class": "M"},
                   "observations": [O(i, "cycle_rate", v, ts) for i, (ts, v) in enumerate(
@@ -197,6 +206,7 @@ CASES = {
     },
     # -- counterfactuals (each asserts the CHANGED outcome) ---------------
     "ct_compstress_01_delta_below_threshold": {
+        "refutes": "compensated_stress_v1",
         "input": {"unit_profile": PROFILE,
                   "observations": [O(i, "cycle_rate", v, ts) for i, (ts, v) in enumerate(
                       [("2026-07-03T10:00:00Z", 70), ("2026-07-03T11:30:00Z", 72),
@@ -208,6 +218,7 @@ CASES = {
         "assert": {"matched_signatures": [], "severity": "S1", "action_tier": "D0"},
     },
     "ct_compstress_02_pressure_flat": {
+        "refutes": "compensated_stress_v1",
         "input": {"unit_profile": PROFILE,
                   "observations": [O(i, "cycle_rate", v, ts) for i, (ts, v) in enumerate(
                       [("2026-07-03T10:00:00Z", 88), ("2026-07-03T11:30:00Z", 95),
@@ -219,6 +230,7 @@ CASES = {
         "assert": {"matched_signatures": []},
     },
     "ct_highrate_01_not_sustained": {
+        "refutes": "high_cycle_rate_simple_v1",
         "input": {"unit_profile": PROFILE,
                   "observations": [O(i, "cycle_rate", v, ts) for i, (ts, v) in enumerate(
                       [("2026-07-03T12:00:00Z", 134), ("2026-07-03T12:30:00Z", 120),
@@ -227,6 +239,7 @@ CASES = {
         "assert": {"matched_signatures": []},
     },
     "ct_lowsat_01_above_threshold": {
+        "refutes": "low_saturation_critical_v1",
         "input": {"unit_profile": {"unit_id": "u-003", "service_age_years": 70, "class": "F",
                                    "known_conditions": ["reduced_capacity"]},
                   "observations": [O(0, "saturation_pct", 91, "2026-07-03T10:05:00Z")],
@@ -234,6 +247,7 @@ CASES = {
         "assert": {"matched_signatures": [], "severity": "S1"},
     },
     "ct_reserve_01_stable_level": {
+        "refutes": "reserve_depletion_v1",
         "input": {"unit_profile": PROFILE,
                   "observations": [O(i, "reserve_level", v, ts, source="inline_gauge") for i, (ts, v) in enumerate(
                       [("2026-07-03T02:00:00Z", 28), ("2026-07-03T05:00:00Z", 29),
@@ -243,6 +257,7 @@ CASES = {
         "assert": {"matched_signatures": []},
     },
     "ct_unresponsive_01_alert": {
+        "refutes": "unresponsive_unit_v1",
         "input": {"unit_profile": PROFILE,
                   "observations": [O(0, "responsiveness", "R1", "2026-07-03T13:00:00Z", source="manual_entry")],
                   "context": FIELD, "reference_time": None},
@@ -262,6 +277,15 @@ def main(check_only=False):
             actual = out[key]
             if actual != expected:
                 failures.append(f"{name}: {key} expected {expected!r}, got {actual!r}")
+        refuted = case.get("refutes")
+        if refuted:
+            # A counterfactual must show the signature genuinely evaluated to
+            # false — landing in not_evaluable would satisfy matched==[] while
+            # proving nothing (adversarial-review finding).
+            if refuted in out["matched_signatures"]:
+                failures.append(f"{name}: refuted signature {refuted} still matched")
+            if refuted in [ne["id"] for ne in out["not_evaluable_signatures"]]:
+                failures.append(f"{name}: refuted signature {refuted} was not_evaluable, not refuted")
         if check_only:
             continue
         case_dir = os.path.join(OUT, name)

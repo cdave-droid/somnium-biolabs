@@ -56,12 +56,43 @@ def _walk_conditions(node, out):
     out.append(node)
 
 
-def _check_signature_semantics(sig, known_metrics, event_ids, enum_metrics, errors):
+_COMBINATORS = ("all_of", "any_of", "none_of", "at_least_n_of")
+
+
+def _check_logic_structure(node, sid, errors):
+    """Every node must be a leaf or carry EXACTLY one combinator — a second
+    combinator key would otherwise be silently dropped at evaluation time."""
+    if not isinstance(node, dict):
+        return
+    present = [k for k in _COMBINATORS if k in node]
+    if len(present) > 1:
+        errors.append(f"{sid}: logic node has multiple combinator keys ({','.join(present)})")
+        return
+    if not present:
+        return
+    comb = present[0]
+    if comb == "at_least_n_of":
+        spec = node[comb]
+        if isinstance(spec, dict) and isinstance(spec.get("of"), list):
+            if isinstance(spec.get("n"), int) and spec["n"] > len(spec["of"]):
+                errors.append(f"{sid}: at_least_n_of n={spec['n']} exceeds available conditions ({len(spec['of'])})")
+            for child in spec["of"]:
+                _check_logic_structure(child, sid, errors)
+        return
+    if isinstance(node[comb], list):
+        for child in node[comb]:
+            _check_logic_structure(child, sid, errors)
+
+
+def _check_signature_semantics(sig, known_metrics, event_ids, enums, errors):
     sid = sig.get("signature_id", "?")
+    enum_metrics = set(enums)
+    _check_logic_structure(sig.get("logic", {}), sid, errors)
     conditions = []
     _walk_conditions(sig.get("logic", {}), conditions)
     if not conditions:
         errors.append(f"{sid}: logic tree has no conditions")
+    uses_event_present = False
     ids_seen = set()
     for i, cond in enumerate(conditions):
         where = f"{sid}: condition {i}"
@@ -69,9 +100,15 @@ def _check_signature_semantics(sig, known_metrics, event_ids, enum_metrics, erro
             if cond["flag"] not in REFERENCEABLE_FLAGS:
                 errors.append(f"{where}: unknown flag '{cond['flag']}'")
             continue
-        if "baseline_status" in cond and "op" not in cond:
+        if "baseline_status" in cond and "op" in cond:
+            # The op path would win and the guard would be silently discarded.
+            errors.append(f"{where}: condition must not combine 'baseline_status' with 'op'")
+            continue
+        if "baseline_status" in cond:
             if "metric" not in cond:
                 errors.append(f"{where}: baseline_status condition requires 'metric'")
+            elif cond["metric"] not in known_metrics:
+                errors.append(f"{where}: unknown metric '{cond['metric']}'")
             continue
         op = cond.get("op")
         metric = cond.get("metric")
@@ -84,6 +121,7 @@ def _check_signature_semantics(sig, known_metrics, event_ids, enum_metrics, erro
                 errors.append(f"{sid}: duplicate condition id '{cid}'")
             ids_seen.add(cid)
         if op == "event_present":
+            uses_event_present = True
             if "event_id" not in cond:
                 errors.append(f"{where}: event_present requires 'event_id'")
             elif cond["event_id"] not in event_ids:
@@ -100,6 +138,13 @@ def _check_signature_semantics(sig, known_metrics, event_ids, enum_metrics, erro
         if op in COMPARATOR_OPS:
             if "value" not in cond:
                 errors.append(f"{where}: raw-value op '{op}' requires 'value'")
+            elif metric in enum_metrics:
+                if cond["value"] not in enums.get(metric, []):
+                    errors.append(f"{where}: value is not a valid level for ordinal metric '{metric}'")
+            elif isinstance(cond["value"], bool) or not isinstance(cond["value"], (int, float)):
+                # A string value would compare against numbers at runtime:
+                # TypeError in Python, silent nonsense in JS.
+                errors.append(f"{where}: value must be numeric for metric '{metric}'")
             if comparators:
                 errors.append(f"{where}: raw-value op '{op}' must not also carry comparator keys")
             if "window_min" not in cond:
@@ -118,6 +163,11 @@ def _check_signature_semantics(sig, known_metrics, event_ids, enum_metrics, erro
                 errors.append(f"{where}: op '{op}' not valid for ordinal metric '{metric}'")
         else:
             errors.append(f"{where}: unknown op '{op}'")
+
+    if uses_event_present and "event" not in sig.get("required_inputs", []):
+        # Without this, an absent event feed silently reads as "no event"
+        # instead of routing through the missing-input honest-failure path.
+        errors.append(f"{sid}: logic uses event_present but required_inputs does not list 'event'")
 
     for t in sig.get("required_inputs", []) + sig.get("optional_inputs", []):
         if t not in OBSERVATION_TYPES:
@@ -216,7 +266,6 @@ def load_content(package_path: str, schema_dir: str | None = None) -> dict:
 
     bounds = tables["operational_bounds"]
     known_metrics = set(bounds["bounds"].keys()) | set(bounds["enums"].keys())
-    enum_metrics = set(bounds["enums"].keys())
     event_ids = {c["event_id"] for c in tables["event_codes"]["codes"]}
 
     seen_ids = set()
@@ -224,7 +273,7 @@ def load_content(package_path: str, schema_dir: str | None = None) -> dict:
         if sig["signature_id"] in seen_ids:
             errors.append(f"duplicate signature_id '{sig['signature_id']}'")
         seen_ids.add(sig["signature_id"])
-        _check_signature_semantics(sig, known_metrics, event_ids, enum_metrics, errors)
+        _check_signature_semantics(sig, known_metrics, event_ids, bounds["enums"], errors)
     if errors:
         raise ContentError(errors)
 

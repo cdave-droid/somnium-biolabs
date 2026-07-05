@@ -22,6 +22,12 @@ MIN_CASES = 3
 def main():
     content = load_content(PKG)
     counts = {s["signature_id"]: 0 for s in content["published_signatures"]}
+    # Counterfactual credit comes from each signature's DECLARED
+    # counterfactual_tests ids matched as golden-case-name prefixes — never
+    # from name-stem guessing, and not_evaluable does NOT count as exercised
+    # (a signature that never actually evaluated has not been tested).
+    ct_prefixes = {s["signature_id"]: tuple(s.get("counterfactual_tests", []))
+                   for s in content["published_signatures"]}
     for name in sorted(os.listdir(GOLDEN)):
         expected_path = os.path.join(GOLDEN, name, "expected.json")
         if not os.path.exists(expected_path):
@@ -30,13 +36,9 @@ def main():
             out = json.load(fh)
         exercised = set(out["matched_signatures"])
         exercised.update(s["id"] for s in out["suppressed_signatures"])
-        exercised.update(s["id"] for s in out["not_evaluable_signatures"])
-        # counterfactuals exercise the signature they refute
-        if name.startswith("ct_"):
-            stem = name.split("_")[1]
-            for sid in counts:
-                if sid.startswith(stem) or stem in sid:
-                    exercised.add(sid)
+        for sid, prefixes in ct_prefixes.items():
+            if any(name.startswith(p) for p in prefixes if p):
+                exercised.add(sid)
         for sid in exercised:
             if sid in counts:
                 counts[sid] += 1

@@ -90,6 +90,30 @@ def build():
              explanation_template="Delta {v}.", template_bindings={"v": {"condition_id": "c1", "field": "delta_pct"}}),
         "exactly one of gte/lte/eq")
 
+    fixtures["21_baseline_status_with_op.json"] = (
+        _mut(logic={"all_of": [{"id": "c1", "metric": "cycle_rate", "baseline_status": "personalized",
+                                "op": "gte", "value": 100, "window_min": 60}]}),
+        "must not combine 'baseline_status' with 'op'")
+    fixtures["22_two_combinators_one_node.json"] = (
+        _mut(logic={"all_of": [{"id": "c1", "metric": "cycle_rate", "op": "gte", "value": 100, "window_min": 60}],
+                    "any_of": [{"metric": "cycle_rate", "op": "lte", "value": 200, "window_min": 60}]}),
+        "multiple combinator keys")
+    fixtures["23_baseline_status_unknown_metric.json"] = (
+        _mut(logic={"all_of": [{"id": "c1", "metric": "cycle_rate", "op": "gte", "value": 100, "window_min": 60},
+                               {"metric": "voltage", "baseline_status": "personalized"}]}),
+        "unknown metric 'voltage'")
+    fixtures["24_raw_op_value_type_mismatch.json"] = (
+        _mut(logic={"all_of": [{"id": "c1", "metric": "cycle_rate", "op": "gte", "value": "R2", "window_min": 60}]}),
+        "value must be numeric for metric")
+    fixtures["25_at_least_n_exceeds_options.json"] = (
+        _mut(logic={"at_least_n_of": {"n": 3, "of": [
+            {"id": "c1", "metric": "cycle_rate", "op": "gte", "value": 100, "window_min": 60}]}}),
+        "exceeds available conditions")
+    fixtures["26_event_present_without_event_input.json"] = (
+        _mut(logic={"all_of": [{"op": "event_present", "event_id": "EV_POWER_LOSS", "window_min": 60},
+                               {"id": "c1", "metric": "cycle_rate", "op": "gte", "value": 100, "window_min": 60}]}),
+        "required_inputs does not list 'event'")
+
     os.makedirs(OUT, exist_ok=True)
     expectations = {}
     for name, (doc, expect) in sorted(fixtures.items()):

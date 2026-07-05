@@ -1,0 +1,81 @@
+{
+  "case_id": "f929a535-bbe1-5f4f-9447-4a45d02d4df9",
+  "engine_version": "1.0.0",
+  "content_version": "2026.07.0-demo",
+  "reference_time": "2026-07-03T13:00:00Z",
+  "severity": "S3",
+  "trajectory": "worsening",
+  "action_tier": "D3",
+  "matched_signatures": [
+    "reserve_depletion_v1"
+  ],
+  "suppressed_signatures": [],
+  "not_evaluable_signatures": [
+    {
+      "id": "compensated_stress_v1",
+      "reason": "missing_required_input:cycle_rate,pressure_primary"
+    },
+    {
+      "id": "high_cycle_rate_simple_v1",
+      "reason": "missing_required_input:cycle_rate"
+    },
+    {
+      "id": "low_saturation_critical_v1",
+      "reason": "missing_required_input:saturation_pct"
+    },
+    {
+      "id": "unresponsive_unit_v1",
+      "reason": "missing_required_input:responsiveness"
+    }
+  ],
+  "confidence": "high",
+  "flags": [
+    "baseline_ok",
+    "content_unsigned",
+    "signatures_not_evaluable"
+  ],
+  "explanation": "Reserve level is at 21 and falling (slope -0.028 per minute over the last 12 hours). At this rate the reserve will be exhausted without intervention. Note: Personalized baselines were available for all evaluated metrics. Note: The loaded content package is hash-verified but not cryptographically signed. Note: One or more signatures could not be evaluated for this case (missing inputs or insufficient data).",
+  "reasoning_trace": [
+    {
+      "stage": "M1",
+      "detail": "accepted 5 observations; quarantined 0; notes 0"
+    },
+    {
+      "stage": "M3",
+      "detail": "baseline cycle_rate: personalized (source=profile, median=68, n_obs=41)"
+    },
+    {
+      "stage": "M4",
+      "detail": "trajectory worsening (worse_signals=1, improving_signals=0, metrics_evaluated=1): reserve_level worsening (slope -0.029825/min)"
+    },
+    {
+      "stage": "M5",
+      "detail": "compensated_stress_v1 not_evaluable (missing_required_input:cycle_rate,pressure_primary)"
+    },
+    {
+      "stage": "M5",
+      "detail": "high_cycle_rate_simple_v1 not_evaluable (missing_required_input:cycle_rate)"
+    },
+    {
+      "stage": "M5",
+      "detail": "low_saturation_critical_v1 not_evaluable (missing_required_input:saturation_pct)"
+    },
+    {
+      "stage": "M5",
+      "detail": "reserve_depletion_v1 matched: c_level.value=21; c_slope.slope=-0.027919"
+    },
+    {
+      "stage": "M5",
+      "detail": "unresponsive_unit_v1 not_evaluable (missing_required_input:responsiveness)"
+    },
+    {
+      "stage": "M6",
+      "detail": "reserve_depletion_v1: fixed_site -> D3"
+    },
+    {
+      "stage": "M7",
+      "detail": "final severity S3, action tier D3, confidence high"
+    }
+  ],
+  "recommended_recheck_min": 60
+}

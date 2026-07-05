@@ -18,5 +18,11 @@
   "17_at_least_n_missing_n.json": "missing required field 'n'",
   "18_out_of_range_tier.json": "not in enum",
   "19_negative_window.json": "below minimum",
-  "20_two_comparators.json": "exactly one of gte/lte/eq"
+  "20_two_comparators.json": "exactly one of gte/lte/eq",
+  "21_baseline_status_with_op.json": "must not combine 'baseline_status' with 'op'",
+  "22_two_combinators_one_node.json": "multiple combinator keys",
+  "23_baseline_status_unknown_metric.json": "unknown metric 'voltage'",
+  "24_raw_op_value_type_mismatch.json": "value must be numeric for metric",
+  "25_at_least_n_exceeds_options.json": "exceeds available conditions",
+  "26_event_present_without_event_input.json": "required_inputs does not list 'event'"
 }

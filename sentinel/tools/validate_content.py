@@ -54,7 +54,8 @@ if __name__ == "__main__":
             for e in errors:
                 print(f"  - {e}")
             sys.exit(1)
-        print("VALID")
+        print("VALID (schema only — package mode adds manifest hashes and "
+              "cross-file semantic checks; a file valid here can still fail the package gate)")
         sys.exit(0)
 
     if not args.package_path:

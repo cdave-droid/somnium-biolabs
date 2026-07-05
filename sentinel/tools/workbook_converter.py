@@ -66,8 +66,18 @@ KIND_MAP = {
 
 
 def convert_scenario(sc):
+    import re
+    if re.search(r"\{[a-z_][a-z0-9_]*\}", sc["explanation"]):
+        # Drafts with unbound {placeholders} would fail content validation;
+        # bindings require SME judgment, so drafts must use plain text and
+        # gain template_bindings during review.
+        raise ValueError(
+            f"{sc['scenario_id']}: explanation contains {{placeholders}} — draft explanations "
+            "must be plain text; add template_bindings during SME review")
     conditions = [KIND_MAP[c["kind"]](c, i) for i, c in enumerate(sc["conditions"])]
     required = sorted({c["metric"] for c in sc["conditions"] if "metric" in c})
+    if any(c["kind"] == "event_reported" for c in sc["conditions"]) and "event" not in required:
+        required = sorted(required + ["event"])
     sig = {
         "signature_id": f"{sc['scenario_id']}_v1",
         "version": "0.1.0",
@@ -75,7 +85,7 @@ def convert_scenario(sc):
         "name": sc["name"],
         "author": "[workbook converter — requires SME review]",
         "reviewers": [],
-        "required_inputs": required or ["event"],
+        "required_inputs": required if required else ["event"],
         "logic": {"all_of": conditions},
         "severity": sc["severity"],
         "action_tier_by_context": sc["response_by_context"],

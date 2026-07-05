@@ -106,19 +106,58 @@ export function walkConditions(node: any, out: any[]): void {
   out.push(node);
 }
 
+const COMBINATORS = ["all_of", "any_of", "none_of", "at_least_n_of"];
+
+/** Every node must be a leaf or carry EXACTLY one combinator — a second
+ * combinator key would otherwise be silently dropped at evaluation time. */
+function checkLogicStructure(node: any, sid: string, errors: string[]): void {
+  if (typeof node !== "object" || node === null || Array.isArray(node)) {
+    return;
+  }
+  const present = COMBINATORS.filter((k) => k in node);
+  if (present.length > 1) {
+    errors.push(`${sid}: logic node has multiple combinator keys (${present.join(",")})`);
+    return;
+  }
+  if (present.length === 0) {
+    return;
+  }
+  const comb = present[0];
+  if (comb === "at_least_n_of") {
+    const spec = node[comb];
+    if (spec !== null && typeof spec === "object" && Array.isArray(spec.of)) {
+      if (Number.isInteger(spec.n) && spec.n > spec.of.length) {
+        errors.push(`${sid}: at_least_n_of n=${spec.n} exceeds available conditions (${spec.of.length})`);
+      }
+      for (const child of spec.of) {
+        checkLogicStructure(child, sid, errors);
+      }
+    }
+    return;
+  }
+  if (Array.isArray(node[comb])) {
+    for (const child of node[comb]) {
+      checkLogicStructure(child, sid, errors);
+    }
+  }
+}
+
 function checkSignatureSemantics(
   sig: any,
   knownMetrics: Set<string>,
   eventIds: Set<string>,
-  enumMetrics: Set<string>,
+  enums: Record<string, string[]>,
   errors: string[],
 ): void {
   const sid = sig.signature_id ?? "?";
+  const enumMetrics = new Set<string>(Object.keys(enums));
+  checkLogicStructure(sig.logic ?? {}, sid, errors);
   const conditions: any[] = [];
   walkConditions(sig.logic ?? {}, conditions);
   if (conditions.length === 0) {
     errors.push(`${sid}: logic tree has no conditions`);
   }
+  let usesEventPresent = false;
   const idsSeen = new Set<string>();
   conditions.forEach((cond, i) => {
     const where = `${sid}: condition ${i}`;
@@ -128,9 +167,16 @@ function checkSignatureSemantics(
       }
       return;
     }
-    if ("baseline_status" in cond && !("op" in cond)) {
+    if ("baseline_status" in cond && "op" in cond) {
+      // The op path would win and the guard would be silently discarded.
+      errors.push(`${where}: condition must not combine 'baseline_status' with 'op'`);
+      return;
+    }
+    if ("baseline_status" in cond) {
       if (!("metric" in cond)) {
         errors.push(`${where}: baseline_status condition requires 'metric'`);
+      } else if (!knownMetrics.has(cond.metric)) {
+        errors.push(`${where}: unknown metric '${cond.metric}'`);
       }
       return;
     }
@@ -148,6 +194,7 @@ function checkSignatureSemantics(
       idsSeen.add(cid);
     }
     if (op === "event_present") {
+      usesEventPresent = true;
       if (!("event_id" in cond)) {
         errors.push(`${where}: event_present requires 'event_id'`);
       } else if (!eventIds.has(cond.event_id)) {
@@ -169,6 +216,14 @@ function checkSignatureSemantics(
     if (COMPARATOR_OPS.includes(op)) {
       if (!("value" in cond)) {
         errors.push(`${where}: raw-value op '${op}' requires 'value'`);
+      } else if (enumMetrics.has(metric)) {
+        if (!(enums[metric] ?? []).includes(cond.value)) {
+          errors.push(`${where}: value is not a valid level for ordinal metric '${metric}'`);
+        }
+      } else if (typeof cond.value !== "number") {
+        // A string value would compare against numbers at runtime:
+        // TypeError in Python, silent nonsense in JS.
+        errors.push(`${where}: value must be numeric for metric '${metric}'`);
       }
       if (comparators.length > 0) {
         errors.push(`${where}: raw-value op '${op}' must not also carry comparator keys`);
@@ -200,6 +255,12 @@ function checkSignatureSemantics(
   });
 
   const inputTypes: string[] = [...(sig.required_inputs ?? []), ...(sig.optional_inputs ?? [])];
+  if (usesEventPresent && !(sig.required_inputs ?? []).includes("event")) {
+    // Without this, an absent event feed silently reads as "no event"
+    // instead of routing through the missing-input honest-failure path.
+    errors.push(`${sid}: logic uses event_present but required_inputs does not list 'event'`);
+  }
+
   for (const t of inputTypes) {
     if (!OBSERVATION_TYPES.includes(t)) {
       errors.push(`${sid}: unknown input type '${t}'`);
@@ -345,7 +406,6 @@ export function loadContentFromReader(reader: ContentReader): ContentHandle {
 
   const bounds = tables["operational_bounds"];
   const knownMetrics = new Set<string>([...Object.keys(bounds.bounds), ...Object.keys(bounds.enums)]);
-  const enumMetrics = new Set<string>(Object.keys(bounds.enums));
   const eventIds = new Set<string>(tables["event_codes"].codes.map((c: any) => c.event_id));
 
   const seenIds = new Set<string>();
@@ -354,7 +414,7 @@ export function loadContentFromReader(reader: ContentReader): ContentHandle {
       errors.push(`duplicate signature_id '${sig.signature_id}'`);
     }
     seenIds.add(sig.signature_id);
-    checkSignatureSemantics(sig, knownMetrics, eventIds, enumMetrics, errors);
+    checkSignatureSemantics(sig, knownMetrics, eventIds, bounds.enums, errors);
   }
   if (errors.length > 0) {
     throw new ContentError(errors);
