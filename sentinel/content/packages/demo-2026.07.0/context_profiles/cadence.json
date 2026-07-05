@@ -1,0 +1,12 @@
+{
+  "content_type": "cadence",
+  "expected_interval_min_by_deployment": {
+    "fixed_site": 120,
+    "mobile_platform": 60,
+    "field_expedition": 240,
+    "remote_station": 240,
+    "edge_site": 240,
+    "default": 240
+  },
+  "overdue_floor": { "action_tier": "D3", "severity": "S2" }
+}

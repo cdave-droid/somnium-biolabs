@@ -31,7 +31,15 @@ def _population_lookup(pop_table, unit_profile, metric):
     return None
 
 
-def compute_baselines(unit_profile, accepted, content, reference_time, needed_metrics, flags, trace):
+def _valid_stored(entry, min_n_obs):
+    return (isinstance(entry, dict)
+            and all(isinstance(entry.get(f), (int, float)) and not isinstance(entry.get(f), bool)
+                    for f in ("median", "p10", "p90", "n_obs"))
+            and entry["n_obs"] >= min_n_obs)
+
+
+def compute_baselines(unit_profile, accepted, content, reference_time, needed_metrics, flags, trace,
+                      stored_baselines=None):
     cfg = content["tables"]["baseline_config"]
     pop_table = content["tables"]["population_baselines"]
     window_s = cfg["window_days"] * 86400
@@ -43,6 +51,13 @@ def compute_baselines(unit_profile, accepted, content, reference_time, needed_me
             baselines[metric] = {
                 "median": prof["median"], "p10": prof["p10"], "p90": prof["p90"],
                 "n_obs": prof["n_obs"], "status": "personalized", "source": "profile",
+            }
+            continue
+        stored = (stored_baselines or {}).get(metric) if isinstance(stored_baselines, dict) else None
+        if stored is not None and _valid_stored(stored, cfg["min_n_obs"]):
+            baselines[metric] = {
+                "median": stored["median"], "p10": stored["p10"], "p90": stored["p90"],
+                "n_obs": stored["n_obs"], "status": "personalized", "source": "store",
             }
             continue
         values = [

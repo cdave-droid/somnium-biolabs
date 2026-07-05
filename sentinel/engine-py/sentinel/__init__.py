@@ -13,10 +13,13 @@ from .constants import ENGINE_VERSION
 from .content import load_content
 from .engine import Engine, explain
 from .errors import AuditIntegrityError, ContentError
-from .m9_audit import verify_chain
+from .baseline_store import FileBaselineStore, InMemoryBaselineStore
+from .m9_audit import FileAuditSink, load_audit_log, verify_chain
+from .watchdog import check_overdue
 
 __all__ = [
     "AuditIntegrityError", "ContentError", "Engine", "ENGINE_VERSION",
-    "canonical_json", "deterministic_uuid", "explain", "load_content",
-    "q6", "sha256_hex", "verify_chain",
+    "FileAuditSink", "FileBaselineStore", "InMemoryBaselineStore",
+    "canonical_json", "check_overdue", "deterministic_uuid", "explain",
+    "load_audit_log", "load_content", "q6", "sha256_hex", "verify_chain",
 ]

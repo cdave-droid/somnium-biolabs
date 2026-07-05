@@ -15,6 +15,7 @@ export const TABLE_TYPES = [
   "operational_bounds", "never_ignore", "floors", "baseline_config",
   "population_baselines", "units", "worse_direction", "artifact_rules",
   "global_modifiers", "recheck_intervals", "trajectory_rules", "event_codes",
+  "cadence",
 ];
 
 export const COMPARATOR_OPS = ["gte", "lte", "eq"];

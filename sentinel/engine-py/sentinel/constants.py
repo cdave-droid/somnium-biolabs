@@ -61,5 +61,6 @@ FLAG_TEXTS = {
     "no_baseline_history": "This unit had insufficient observation history to compute personalized baselines.",
     "signatures_not_evaluable": "One or more signatures could not be evaluated for this case (missing inputs or insufficient data).",
     "suspect_inputs_present": "One or more readings were quality-flagged as suspect but were still used.",
+    "unit_silent": "No observation has arrived within this unit's expected reporting cadence; the engine cannot evaluate a unit it cannot hear.",
     "unknown_event_code": "An event report used a code that is not in the controlled vocabulary; the engine cannot interpret it.",
 }

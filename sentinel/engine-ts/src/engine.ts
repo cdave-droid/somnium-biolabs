@@ -14,7 +14,7 @@ import { computeBaselines, type Baseline } from "./m3_state.js";
 import { classifyTrajectory, Features } from "./m4_trend.js";
 import { evaluateSignatures, type SigResult } from "./m5_signatures.js";
 import { modifierFloors, signatureTier } from "./m6_context.js";
-import { AuditLog, verifyChain, type AuditRecord } from "./m9_audit.js";
+import { AuditLog, verifyChain, type AuditRecord, type AuditSink } from "./m9_audit.js";
 import { fmtTs, parseTs } from "./timeutil.js";
 
 const M8_PHRASES: Record<string, string> = {
@@ -263,22 +263,47 @@ export interface CaseHandle {
   observations: any[];
 }
 
+export interface BaselineStore {
+  get(unitId: string): Record<string, unknown> | null | undefined;
+  put(unitId: string, baselines: Record<string, unknown>): void;
+}
+
 export class Engine {
   content: ContentHandle;
-  audit: AuditLog = new AuditLog();
+  audit: AuditLog;
+  baselineStore: BaselineStore | null;
 
-  constructor(content: ContentHandle) {
+  constructor(content: ContentHandle, auditSink: AuditSink | null = null, baselineStore: BaselineStore | null = null) {
     this.content = content;
+    this.audit = new AuditLog(auditSink);
+    this.baselineStore = baselineStore;
   }
 
   // ------------------------------------------------------------------ API
 
-  evaluate(unitProfile: any, observations: any[], context: any = null, referenceTime: string | null = null): EngineOutput {
+  evaluate(
+    unitProfile: any,
+    observations: any[],
+    context: any = null,
+    referenceTime: string | null = null,
+    storedBaselines: any = null,
+  ): EngineOutput {
+    // Stored baselines are an INPUT: fetched once, recorded in the audit
+    // log, and replayed verbatim — the store itself is never consulted
+    // during replay (determinism, D2/D8).
+    if (storedBaselines === null && this.baselineStore !== null &&
+        unitProfile !== null && typeof unitProfile === "object" && !Array.isArray(unitProfile)) {
+      const unitId = unitProfile.unit_id;
+      if (typeof unitId === "string") {
+        storedBaselines = this.baselineStore.get(unitId) ?? null;
+      }
+    }
     const inputs = {
       unit_profile: unitProfile,
       observations,
       context,
       reference_time: referenceTime,
+      stored_baselines: storedBaselines,
     };
     let output: EngineOutput;
     try {
@@ -287,6 +312,7 @@ export class Engine {
         pyTruthy(observations) ? observations : [],
         context,
         referenceTime,
+        storedBaselines,
       );
     } catch (exc) {
       // prime directive 2: fail toward caution
@@ -357,6 +383,7 @@ export class Engine {
           p.observations,
           p.context,
           p.reference_time,
+          p.stored_baselines ?? null,
         );
         if (canonicalJson(fresh) !== canonicalJson((record.payload as any).output)) {
           throw new AuditIntegrityError(`replay mismatch for case ${record.case_id}`);
@@ -374,6 +401,7 @@ export class Engine {
     observations: any[],
     context: any,
     referenceTime: string | null,
+    storedBaselines: any = null,
   ): EngineOutput {
     const content = this.content;
     const flags = new Set<string>(content.flags);
@@ -437,7 +465,7 @@ export class Engine {
         suppressed: [],
         not_evaluable: [],
         not_matched: [],
-      }, "unknown", rejectedFloors);
+      }, "unknown", rejectedFloors, storedBaselines);
     }
 
     // M2 — signal quality
@@ -459,7 +487,7 @@ export class Engine {
         }
       }
     }
-    const baselines = computeBaselines(unitProfile, accepted, content, ref as number, needed, flags, trace);
+    const baselines = computeBaselines(unitProfile, accepted, content, ref as number, needed, flags, trace, storedBaselines);
 
     // M4 — features & trajectory
     const features = new Features(accepted, content, ref as number);
@@ -523,7 +551,7 @@ export class Engine {
       }
     }
 
-    return this.compose(unitProfile, observations, context, referenceTime, ref, flags, trace, m8Triggers, sigres, trajectoryBase, niFloors);
+    return this.compose(unitProfile, observations, context, referenceTime, ref, flags, trace, m8Triggers, sigres, trajectoryBase, niFloors, storedBaselines);
   }
 
   // -------------------------------------------------------- M7/M8 compose
@@ -540,6 +568,7 @@ export class Engine {
     sigres: SigResult,
     trajectoryBase: string,
     niFloors: string[],
+    storedBaselines: any = null,
   ): EngineOutput {
     const content = this.content;
     const matched = sigres.matched;
@@ -675,6 +704,7 @@ export class Engine {
         observations,
         context,
         reference_time: referenceTimeArg,
+        stored_baselines: storedBaselines,
         engine_version: ENGINE_VERSION,
         content_version: content.content_version,
       });

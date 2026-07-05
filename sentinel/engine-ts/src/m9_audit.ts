@@ -6,6 +6,11 @@ import { AuditIntegrityError } from "./errors.js";
 
 export const GENESIS_HASH = "0".repeat(64);
 
+/** Durable record sink — implementations append records as they are chained. */
+export interface AuditSink {
+  write(record: AuditRecord): void;
+}
+
 export interface AuditRecord {
   seq: number;
   record_type: string;
@@ -19,6 +24,18 @@ export interface AuditRecord {
 
 export class AuditLog {
   records: AuditRecord[] = [];
+  sink: AuditSink | null;
+
+  constructor(sink: AuditSink | null = null, records: AuditRecord[] = []) {
+    this.sink = sink;
+    this.records = [...records];
+  }
+
+  /** Current chain-head hash — publish/countersign this externally to make
+   * whole-log truncation detectable (anchoring is the caller's job). */
+  chainHead(): string {
+    return this.records.length > 0 ? this.records[this.records.length - 1].hash : GENESIS_HASH;
+  }
 
   append(
     recordType: string,
@@ -39,6 +56,9 @@ export class AuditLog {
     };
     const record: AuditRecord = { ...body, hash: sha256Hex(canonicalJson(body)) };
     this.records.push(record);
+    if (this.sink !== null) {
+      this.sink.write(record);
+    }
     return record;
   }
 }

@@ -789,6 +789,49 @@
           }
         }
       }
+    },
+    "cadence": {
+      "type": "object",
+      "required": [
+        "content_type",
+        "expected_interval_min_by_deployment",
+        "overdue_floor"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "content_type": {
+          "type": "string",
+          "enum": [
+            "cadence"
+          ]
+        },
+        "expected_interval_min_by_deployment": {
+          "type": "object",
+          "required": [
+            "default"
+          ],
+          "additionalProperties": {
+            "type": "number",
+            "minimum": 1
+          }
+        },
+        "overdue_floor": {
+          "type": "object",
+          "required": [
+            "action_tier",
+            "severity"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "action_tier": {
+              "$ref": "#/$defs/tier"
+            },
+            "severity": {
+              "$ref": "#/$defs/severity"
+            }
+          }
+        }
+      }
     }
   }
 }

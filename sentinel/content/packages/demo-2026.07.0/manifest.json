@@ -7,6 +7,10 @@
   },
   "files": [
     {
+      "path": "context_profiles/cadence.json",
+      "sha256": "c4db67d6d9f51fe72a3b1c1dd97c5f161e5b0eb5f74de739f5f63d0e8651176e"
+    },
+    {
       "path": "context_profiles/global_modifiers.json",
       "sha256": "cba13e67f2f6f10cb82bc9af4d89ac4287e87c9c51e5c66ab747ba5f57bb8788"
     },
@@ -75,5 +79,5 @@
       "sha256": "a83785f92378b324af325e2c9d68f382d244820c48e141b470e56b08545ed055"
     }
   ],
-  "package_hash": "c1fa41386cb4b603bc55063f7133ed2373a7dfd29a41b74fb0bfb8d5e2f2264e"
+  "package_hash": "bc8b18e1e64b38ed74f960eafabfde04a4a1e23d81d80deeb0c06e770f759ca2"
 }

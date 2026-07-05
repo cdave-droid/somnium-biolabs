@@ -54,6 +54,14 @@ function populationLookup(popTable: any, unitProfile: any, metric: string): any 
   return null;
 }
 
+function validStored(entry: any, minNObs: number): boolean {
+  return (
+    entry !== null && typeof entry === "object" && !Array.isArray(entry) &&
+    ["median", "p10", "p90", "n_obs"].every((f) => typeof entry[f] === "number") &&
+    entry.n_obs >= minNObs
+  );
+}
+
 export function computeBaselines(
   unitProfile: any,
   accepted: NormalizedObs[],
@@ -62,6 +70,7 @@ export function computeBaselines(
   neededMetrics: Set<string>,
   flags: Set<string>,
   trace: Array<{ stage: string; detail: string }>,
+  storedBaselines: any = null,
 ): Record<string, Baseline> {
   const cfg = content.tables["baseline_config"];
   const popTable = content.tables["population_baselines"];
@@ -75,6 +84,17 @@ export function computeBaselines(
       baselines[metric] = {
         median: req(prof, "median"), p10: req(prof, "p10"), p90: req(prof, "p90"),
         n_obs: req(prof, "n_obs"), status: "personalized", source: "profile",
+      };
+      continue;
+    }
+    const stored =
+      storedBaselines !== null && typeof storedBaselines === "object" && !Array.isArray(storedBaselines) && own(storedBaselines, metric)
+        ? storedBaselines[metric]
+        : null;
+    if (stored !== null && validStored(stored, cfg.min_n_obs)) {
+      baselines[metric] = {
+        median: stored.median, p10: stored.p10, p90: stored.p90,
+        n_obs: stored.n_obs, status: "personalized", source: "store",
       };
       continue;
     }

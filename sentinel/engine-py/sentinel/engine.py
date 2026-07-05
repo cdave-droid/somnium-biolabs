@@ -68,21 +68,32 @@ def _max_severity(severities):
 
 
 class Engine:
-    def __init__(self, content):
+    def __init__(self, content, audit_sink=None, baseline_store=None):
         self.content = content
-        self.audit = AuditLog()
+        self.audit = AuditLog(sink=audit_sink)
+        self.baseline_store = baseline_store
 
     # ------------------------------------------------------------------ API
 
-    def evaluate(self, unit_profile, observations, context=None, reference_time=None):
+    def evaluate(self, unit_profile, observations, context=None, reference_time=None,
+                 stored_baselines=None):
+        # Stored baselines are an INPUT: fetched once, recorded in the audit
+        # log, and replayed verbatim — the store itself is never consulted
+        # during replay (determinism, D2/D8).
+        if stored_baselines is None and self.baseline_store is not None and isinstance(unit_profile, dict):
+            unit_id = unit_profile.get("unit_id")
+            if isinstance(unit_id, str):
+                stored_baselines = self.baseline_store.get(unit_id)
         inputs = {
             "unit_profile": unit_profile,
             "observations": observations,
             "context": context,
             "reference_time": reference_time,
+            "stored_baselines": stored_baselines,
         }
         try:
-            output = self._evaluate_inner(unit_profile or {}, observations or [], context, reference_time)
+            output = self._evaluate_inner(unit_profile or {}, observations or [], context,
+                                          reference_time, stored_baselines)
         except Exception as exc:  # prime directive 2: fail toward caution
             output = self._emergency_output(inputs, exc)
         # M9 recording must also fail toward caution: raw caller inputs may be
@@ -137,7 +148,8 @@ class Engine:
                         f"replay requires content {inp['content_version']}, loaded {self.content['content_version']}")
                 p = inp["payload"]
                 fresh = Engine(self.content).evaluate(
-                    p["unit_profile"], p["observations"], p["context"], p["reference_time"])
+                    p["unit_profile"], p["observations"], p["context"], p["reference_time"],
+                    stored_baselines=p.get("stored_baselines"))
                 if canonical_json(fresh) != canonical_json(record["payload"]["output"]):
                     raise AuditIntegrityError(f"replay mismatch for case {record['case_id']}")
                 outputs.append(fresh)
@@ -145,7 +157,8 @@ class Engine:
 
     # ------------------------------------------------------------- pipeline
 
-    def _evaluate_inner(self, unit_profile, observations, context, reference_time):
+    def _evaluate_inner(self, unit_profile, observations, context, reference_time,
+                        stored_baselines=None):
         content = self.content
         flags = set(content["flags"])
         trace = []
@@ -190,7 +203,8 @@ class Engine:
             return self._compose(unit_profile, observations, context, reference_time, ref,
                                  flags, trace, m8_triggers,
                                  sigres={"matched": [], "suppressed": [], "not_evaluable": [], "not_matched": []},
-                                 trajectory_base="unknown", ni_floors=rejected_floors)
+                                 trajectory_base="unknown", ni_floors=rejected_floors,
+                                 stored_baselines=stored_baselines)
 
         # M2 — signal quality
         artifact_metrics, protected_metrics = m2_quality.assess(accepted, unit_profile, content, flags, trace)
@@ -208,7 +222,8 @@ class Engine:
             for c in conds:
                 if c.get("op", "").startswith("delta_from_baseline") or ("baseline_status" in c and "metric" in c):
                     needed.add(c["metric"])
-        baselines = m3_state.compute_baselines(unit_profile, accepted, content, ref, needed, flags, trace)
+        baselines = m3_state.compute_baselines(unit_profile, accepted, content, ref, needed, flags, trace,
+                                               stored_baselines=stored_baselines)
 
         # M4 — features & trajectory
         features = Features(accepted, content, ref)
@@ -261,12 +276,14 @@ class Engine:
                 trace.append({"stage": "M8", "detail": f"never-ignore bound {bound['id']} breached by artifact-flagged reading ({metric}); floor {bound['floor_tier']}"})
 
         return self._compose(unit_profile, observations, context, reference_time, ref,
-                             flags, trace, m8_triggers, sigres, trajectory_base, ni_floors)
+                             flags, trace, m8_triggers, sigres, trajectory_base, ni_floors,
+                             stored_baselines=stored_baselines)
 
     # -------------------------------------------------------- M7/M8 compose
 
     def _compose(self, unit_profile, observations, context, reference_time_arg, ref,
-                 flags, trace, m8_triggers, sigres, trajectory_base, ni_floors):
+                 flags, trace, m8_triggers, sigres, trajectory_base, ni_floors,
+                 stored_baselines=None):
         content = self.content
         matched = sigres["matched"]
         m8_active = bool(m8_triggers)
@@ -359,7 +376,8 @@ class Engine:
         try:
             case_id = deterministic_uuid({
                 "unit_profile": unit_profile, "observations": observations, "context": context,
-                "reference_time": reference_time_arg, "engine_version": ENGINE_VERSION,
+                "reference_time": reference_time_arg, "stored_baselines": stored_baselines,
+                "engine_version": ENGINE_VERSION,
                 "content_version": content["content_version"],
             })
         except (TypeError, ValueError):
