@@ -25,9 +25,15 @@ FUNCTION_OPS = [
 ]
 
 
+def _reject_constant(name):
+    # Python's json accepts NaN/Infinity by default; engine-ts (JSON.parse)
+    # never can, so such content must fail closed here too.
+    raise ValueError(f"non-finite number ({name}) is not valid content JSON")
+
+
 def _read_json(path):
     with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
+        return json.load(f, parse_constant=_reject_constant)
 
 
 def _semver_tuple(v: str):

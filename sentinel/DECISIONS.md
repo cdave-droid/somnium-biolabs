@@ -145,8 +145,10 @@ by escalation order `worsening > unknown > stable > improving`.
 1. Zero accepted observations. 2. All accepted observations `artifact_likely`
 (none mechanism-protected). 3. Every published signature `not_evaluable` (or the
 package has none). 4. Unknown `event_id` (G3 battery requires this to route to
-M8). 5. Never-ignore absolute bounds: a breach by a **usable** reading floors the
-tier **unconditionally** (a matched low-tier signature must never shadow an
+M8). 5. Never-ignore absolute bounds: a breach by **any usable** reading within the
+content-defined `never_ignore.window_min` (demo: 240) floors the tier
+**unconditionally** — a breach must not vanish because a newer in-range reading
+arrived afterwards (a matched low-tier signature must never shadow an
 absolute bound) and additionally routes to M8-insufficient when no matched
 signature covers that metric; a breach visible only in **artifact-flagged** or
 **quarantined (physically impossible)** readings always routes to M8-insufficient

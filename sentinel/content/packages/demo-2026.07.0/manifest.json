@@ -64,7 +64,7 @@
     },
     {
       "path": "thresholds/never_ignore.json",
-      "sha256": "cd17848fb688a298f769b4bc7eb12a532ff36d5dbb8edfe076bc3f2b3b422da1"
+      "sha256": "c94142837e5cb453986858277bd50b929bf854ff323642eabacf14f53d1fcf88"
     },
     {
       "path": "thresholds/operational_bounds.json",
@@ -75,5 +75,5 @@
       "sha256": "a83785f92378b324af325e2c9d68f382d244820c48e141b470e56b08545ed055"
     }
   ],
-  "package_hash": "15e8c5e524e2ce27af1212a964e9e35620562fa904e2fb798f90d39aa92ee381"
+  "package_hash": "c1fa41386cb4b603bc55063f7133ed2373a7dfd29a41b74fb0bfb8d5e2f2264e"
 }

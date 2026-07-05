@@ -231,14 +231,18 @@ class Engine:
         covered = set()
         for m in sigres["matched"]:
             covered.update(m["sig"]["required_inputs"])
+        # Any usable breach inside the content-defined window floors the tier
+        # — a breach must not vanish just because a newer in-range reading
+        # arrived afterwards (escalation bias; DECISIONS D13.5).
+        ni_window_s = content["tables"]["never_ignore"]["window_min"] * 60
         for bound in content["tables"]["never_ignore"]["bounds"]:
             metric = bound["metric"]
-            series = [o for o in accepted if o["type"] == metric]
-            latest_usable = None
-            for o in series:
-                if o["quality"] != "artifact_likely" or o["mechanism_protected"]:
-                    latest_usable = o
-            confident_breach = latest_usable is not None and _breaches(bound, latest_usable["value"], enums)
+            series = [o for o in accepted if o["type"] == metric
+                      and ref is not None and ref - ni_window_s <= o["ts"] <= ref]
+            confident_breach = any(
+                (o["quality"] != "artifact_likely" or o["mechanism_protected"])
+                and _breaches(bound, o["value"], enums)
+                for o in series)
             artifact_breach = any(
                 o["quality"] == "artifact_likely" and not o["mechanism_protected"]
                 and _breaches(bound, o["value"], enums)
@@ -295,12 +299,15 @@ class Engine:
             flags.add("engine_could_not_fully_evaluate")
         action_tier = _max_tier(tier_candidates)
 
-        # Trajectory (DECISIONS.md D11)
+        # Trajectory (DECISIONS.md D11): overrides from the top-severity
+        # matches win; ties among them resolve by escalation order.
         trajectory = trajectory_base
         overrides = [m["sig"]["trajectory_override"] for m in matched if m["sig"].get("trajectory_override")]
         if overrides:
-            top = matched[0]  # highest severity first (sorted in M5)
-            trajectory = top["sig"].get("trajectory_override") or _max_by_traj(overrides)
+            top_severity = matched[0]["sig"]["severity"]
+            top_overrides = [m["sig"]["trajectory_override"] for m in matched
+                             if m["sig"]["severity"] == top_severity and m["sig"].get("trajectory_override")]
+            trajectory = _max_by_traj(top_overrides if top_overrides else overrides)
 
         # Confidence (DECISIONS.md D12). A signature that is not_evaluable
         # because its modality was never observed is normal operation and does

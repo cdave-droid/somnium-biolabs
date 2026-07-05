@@ -1,11 +1,48 @@
 {
   "content_type": "never_ignore",
+  "window_min": 240,
   "bounds": [
-    { "id": "ni_saturation_low", "metric": "saturation_pct", "op": "lte", "value": 80, "floor_tier": "D5" },
-    { "id": "ni_cycle_high", "metric": "cycle_rate", "op": "gte", "value": 170, "floor_tier": "D4" },
-    { "id": "ni_cycle_low", "metric": "cycle_rate", "op": "lte", "value": 35, "floor_tier": "D5" },
-    { "id": "ni_temp_high", "metric": "temperature_c", "op": "gte", "value": 41, "floor_tier": "D4" },
-    { "id": "ni_pressure_low", "metric": "pressure_primary", "op": "lte", "value": 75, "floor_tier": "D5" },
-    { "id": "ni_responsiveness", "metric": "responsiveness", "op": "gte", "value": "R2", "floor_tier": "D5" }
+    {
+      "id": "ni_saturation_low",
+      "metric": "saturation_pct",
+      "op": "lte",
+      "value": 80,
+      "floor_tier": "D5"
+    },
+    {
+      "id": "ni_cycle_high",
+      "metric": "cycle_rate",
+      "op": "gte",
+      "value": 170,
+      "floor_tier": "D4"
+    },
+    {
+      "id": "ni_cycle_low",
+      "metric": "cycle_rate",
+      "op": "lte",
+      "value": 35,
+      "floor_tier": "D5"
+    },
+    {
+      "id": "ni_temp_high",
+      "metric": "temperature_c",
+      "op": "gte",
+      "value": 41,
+      "floor_tier": "D4"
+    },
+    {
+      "id": "ni_pressure_low",
+      "metric": "pressure_primary",
+      "op": "lte",
+      "value": 75,
+      "floor_tier": "D5"
+    },
+    {
+      "id": "ni_responsiveness",
+      "metric": "responsiveness",
+      "op": "gte",
+      "value": "R2",
+      "floor_tier": "D5"
+    }
   ]
 }

@@ -3,106 +3,234 @@
   "title": "ContentTables",
   "description": "One $def per content_type; the validator dispatches on the file's content_type field.",
   "$defs": {
-    "tier": { "type": "string", "enum": ["D0", "D1", "D2", "D3", "D4", "D5"] },
-    "severity": { "type": "string", "enum": ["S1", "S2", "S3", "S4"] },
-
+    "tier": {
+      "type": "string",
+      "enum": [
+        "D0",
+        "D1",
+        "D2",
+        "D3",
+        "D4",
+        "D5"
+      ]
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "S1",
+        "S2",
+        "S3",
+        "S4"
+      ]
+    },
     "operational_bounds": {
       "type": "object",
-      "required": ["content_type", "bounds", "enums"],
+      "required": [
+        "content_type",
+        "bounds",
+        "enums"
+      ],
       "additionalProperties": false,
       "properties": {
-        "content_type": { "type": "string", "enum": ["operational_bounds"] },
+        "content_type": {
+          "type": "string",
+          "enum": [
+            "operational_bounds"
+          ]
+        },
         "bounds": {
           "type": "object",
           "additionalProperties": {
             "type": "object",
-            "required": ["min", "max"],
+            "required": [
+              "min",
+              "max"
+            ],
             "additionalProperties": false,
-            "properties": { "min": { "type": "number" }, "max": { "type": "number" } }
+            "properties": {
+              "min": {
+                "type": "number"
+              },
+              "max": {
+                "type": "number"
+              }
+            }
           }
         },
         "enums": {
           "type": "object",
-          "additionalProperties": { "type": "array", "minItems": 2, "items": { "type": "string" } }
+          "additionalProperties": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "type": "string"
+            }
+          }
         }
       }
     },
-
     "never_ignore": {
       "type": "object",
-      "required": ["content_type", "bounds"],
+      "required": [
+        "content_type",
+        "window_min",
+        "bounds"
+      ],
       "additionalProperties": false,
       "properties": {
-        "content_type": { "type": "string", "enum": ["never_ignore"] },
+        "content_type": {
+          "type": "string",
+          "enum": [
+            "never_ignore"
+          ]
+        },
+        "window_min": {
+          "type": "number",
+          "minimum": 1
+        },
         "bounds": {
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["id", "metric", "op", "value", "floor_tier"],
+            "required": [
+              "id",
+              "metric",
+              "op",
+              "value",
+              "floor_tier"
+            ],
             "additionalProperties": false,
             "properties": {
-              "id": { "type": "string", "minLength": 1 },
-              "metric": { "type": "string", "minLength": 1 },
-              "op": { "type": "string", "enum": ["gte", "lte"] },
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "metric": {
+                "type": "string",
+                "minLength": 1
+              },
+              "op": {
+                "type": "string",
+                "enum": [
+                  "gte",
+                  "lte"
+                ]
+              },
               "value": {},
-              "floor_tier": { "$ref": "#/$defs/tier" }
+              "floor_tier": {
+                "$ref": "#/$defs/tier"
+              }
             }
           }
         }
       }
     },
-
     "floors": {
       "type": "object",
-      "required": ["content_type", "insufficient_floor_by_deployment", "mechanism_floor"],
+      "required": [
+        "content_type",
+        "insufficient_floor_by_deployment",
+        "mechanism_floor"
+      ],
       "additionalProperties": false,
       "properties": {
-        "content_type": { "type": "string", "enum": ["floors"] },
+        "content_type": {
+          "type": "string",
+          "enum": [
+            "floors"
+          ]
+        },
         "insufficient_floor_by_deployment": {
           "type": "object",
-          "required": ["default"],
+          "required": [
+            "default"
+          ],
           "additionalProperties": {
             "type": "object",
-            "required": ["action_tier", "severity"],
+            "required": [
+              "action_tier",
+              "severity"
+            ],
             "additionalProperties": false,
             "properties": {
-              "action_tier": { "$ref": "#/$defs/tier" },
-              "severity": { "$ref": "#/$defs/severity" }
+              "action_tier": {
+                "$ref": "#/$defs/tier"
+              },
+              "severity": {
+                "$ref": "#/$defs/severity"
+              }
             }
           }
         },
-        "mechanism_floor": { "$ref": "#/$defs/tier" }
+        "mechanism_floor": {
+          "$ref": "#/$defs/tier"
+        }
       }
     },
-
     "baseline_config": {
       "type": "object",
-      "required": ["content_type", "window_days", "min_n_obs"],
+      "required": [
+        "content_type",
+        "window_days",
+        "min_n_obs"
+      ],
       "additionalProperties": false,
       "properties": {
-        "content_type": { "type": "string", "enum": ["baseline_config"] },
-        "window_days": { "type": "number", "minimum": 1 },
-        "min_n_obs": { "type": "integer", "minimum": 1 }
+        "content_type": {
+          "type": "string",
+          "enum": [
+            "baseline_config"
+          ]
+        },
+        "window_days": {
+          "type": "number",
+          "minimum": 1
+        },
+        "min_n_obs": {
+          "type": "integer",
+          "minimum": 1
+        }
       }
     },
-
     "population_baselines": {
       "type": "object",
-      "required": ["content_type", "age_bands", "defaults"],
+      "required": [
+        "content_type",
+        "age_bands",
+        "defaults"
+      ],
       "additionalProperties": false,
       "properties": {
-        "content_type": { "type": "string", "enum": ["population_baselines"] },
+        "content_type": {
+          "type": "string",
+          "enum": [
+            "population_baselines"
+          ]
+        },
         "age_bands": {
           "type": "array",
           "minItems": 1,
           "items": {
             "type": "object",
-            "required": ["band", "min", "max"],
+            "required": [
+              "band",
+              "min",
+              "max"
+            ],
             "additionalProperties": false,
             "properties": {
-              "band": { "type": "string", "minLength": 1 },
-              "min": { "type": "number", "minimum": 0 },
-              "max": { "type": "number", "minimum": 0 }
+              "band": {
+                "type": "string",
+                "minLength": 1
+              },
+              "min": {
+                "type": "number",
+                "minimum": 0
+              },
+              "max": {
+                "type": "number",
+                "minimum": 0
+              }
             }
           }
         },
@@ -111,27 +239,44 @@
           "minItems": 1,
           "items": {
             "type": "object",
-            "required": ["match", "baselines"],
+            "required": [
+              "match",
+              "baselines"
+            ],
             "additionalProperties": false,
             "properties": {
               "match": {
                 "type": "object",
                 "additionalProperties": false,
                 "properties": {
-                  "class": { "type": "string" },
-                  "age_band": { "type": "string" }
+                  "class": {
+                    "type": "string"
+                  },
+                  "age_band": {
+                    "type": "string"
+                  }
                 }
               },
               "baselines": {
                 "type": "object",
                 "additionalProperties": {
                   "type": "object",
-                  "required": ["median", "p10", "p90"],
+                  "required": [
+                    "median",
+                    "p10",
+                    "p90"
+                  ],
                   "additionalProperties": false,
                   "properties": {
-                    "median": { "type": "number" },
-                    "p10": { "type": "number" },
-                    "p90": { "type": "number" }
+                    "median": {
+                      "type": "number"
+                    },
+                    "p10": {
+                      "type": "number"
+                    },
+                    "p90": {
+                      "type": "number"
+                    }
                   }
                 }
               }
@@ -140,60 +285,127 @@
         }
       }
     },
-
     "units": {
       "type": "object",
-      "required": ["content_type", "canonical", "conversions"],
+      "required": [
+        "content_type",
+        "canonical",
+        "conversions"
+      ],
       "additionalProperties": false,
       "properties": {
-        "content_type": { "type": "string", "enum": ["units"] },
-        "canonical": { "type": "object", "additionalProperties": { "type": "string", "minLength": 1 } },
+        "content_type": {
+          "type": "string",
+          "enum": [
+            "units"
+          ]
+        },
+        "canonical": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
         "conversions": {
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["type", "from", "factor", "offset"],
+            "required": [
+              "type",
+              "from",
+              "factor",
+              "offset"
+            ],
             "additionalProperties": false,
             "properties": {
-              "type": { "type": "string", "minLength": 1 },
-              "from": { "type": "string", "minLength": 1 },
-              "factor": { "type": "number" },
-              "offset": { "type": "number" }
+              "type": {
+                "type": "string",
+                "minLength": 1
+              },
+              "from": {
+                "type": "string",
+                "minLength": 1
+              },
+              "factor": {
+                "type": "number"
+              },
+              "offset": {
+                "type": "number"
+              }
             }
           }
         }
       }
     },
-
     "worse_direction": {
       "type": "object",
-      "required": ["content_type", "directions"],
+      "required": [
+        "content_type",
+        "directions"
+      ],
       "additionalProperties": false,
       "properties": {
-        "content_type": { "type": "string", "enum": ["worse_direction"] },
+        "content_type": {
+          "type": "string",
+          "enum": [
+            "worse_direction"
+          ]
+        },
         "directions": {
           "type": "object",
-          "additionalProperties": { "type": "string", "enum": ["up", "down", "none"] }
+          "additionalProperties": {
+            "type": "string",
+            "enum": [
+              "up",
+              "down",
+              "none"
+            ]
+          }
         }
       }
     },
-
     "artifact_rules": {
       "type": "object",
-      "required": ["content_type", "impossible_jump", "spike_and_recover", "cross_contradiction", "source_prior", "mechanism_map"],
+      "required": [
+        "content_type",
+        "impossible_jump",
+        "spike_and_recover",
+        "cross_contradiction",
+        "source_prior",
+        "mechanism_map"
+      ],
       "additionalProperties": false,
       "properties": {
-        "content_type": { "type": "string", "enum": ["artifact_rules"] },
+        "content_type": {
+          "type": "string",
+          "enum": [
+            "artifact_rules"
+          ]
+        },
         "impossible_jump": {
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["id", "metric", "max_change_per_s"],
+            "required": [
+              "id",
+              "metric",
+              "max_change_per_s"
+            ],
             "additionalProperties": false,
             "properties": {
-              "id": { "type": "string", "minLength": 1 },
-              "metric": { "type": "string", "minLength": 1 },
-              "max_change_per_s": { "type": "number", "minimum": 0 }
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "metric": {
+                "type": "string",
+                "minLength": 1
+              },
+              "max_change_per_s": {
+                "type": "number",
+                "minimum": 0
+              }
             }
           }
         },
@@ -201,14 +413,37 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["id", "metric", "window_s", "drop_pct", "recovery_pct"],
+            "required": [
+              "id",
+              "metric",
+              "window_s",
+              "drop_pct",
+              "recovery_pct"
+            ],
             "additionalProperties": false,
             "properties": {
-              "id": { "type": "string", "minLength": 1 },
-              "metric": { "type": "string", "minLength": 1 },
-              "window_s": { "type": "number", "minimum": 1 },
-              "drop_pct": { "type": "number", "minimum": 0, "maximum": 100 },
-              "recovery_pct": { "type": "number", "minimum": 0, "maximum": 100 }
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "metric": {
+                "type": "string",
+                "minLength": 1
+              },
+              "window_s": {
+                "type": "number",
+                "minimum": 1
+              },
+              "drop_pct": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100
+              },
+              "recovery_pct": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100
+              }
             }
           }
         },
@@ -216,30 +451,73 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["id", "metric", "op", "value", "requires_all", "mark"],
+            "required": [
+              "id",
+              "metric",
+              "op",
+              "value",
+              "requires_all",
+              "mark"
+            ],
             "additionalProperties": false,
             "properties": {
-              "id": { "type": "string", "minLength": 1 },
-              "metric": { "type": "string", "minLength": 1 },
-              "op": { "type": "string", "enum": ["gte", "lte"] },
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "metric": {
+                "type": "string",
+                "minLength": 1
+              },
+              "op": {
+                "type": "string",
+                "enum": [
+                  "gte",
+                  "lte"
+                ]
+              },
               "value": {},
               "requires_all": {
                 "type": "array",
                 "minItems": 1,
                 "items": {
                   "type": "object",
-                  "required": ["metric", "op"],
+                  "required": [
+                    "metric",
+                    "op"
+                  ],
                   "additionalProperties": false,
                   "properties": {
-                    "metric": { "type": "string", "minLength": 1 },
-                    "op": { "type": "string", "enum": ["gte", "lte", "eq", "between"] },
+                    "metric": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "op": {
+                      "type": "string",
+                      "enum": [
+                        "gte",
+                        "lte",
+                        "eq",
+                        "between"
+                      ]
+                    },
                     "value": {},
-                    "min": { "type": "number" },
-                    "max": { "type": "number" }
+                    "min": {
+                      "type": "number"
+                    },
+                    "max": {
+                      "type": "number"
+                    }
                   }
                 }
               },
-              "mark": { "type": "string", "enum": ["suspect", "artifact_likely"] }
+              "mark": {
+                "type": "string",
+                "enum": [
+                  "suspect",
+                  "artifact_likely"
+                ]
+              }
             }
           }
         },
@@ -247,119 +525,266 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["id", "source", "when_noise_flag", "mark"],
+            "required": [
+              "id",
+              "source",
+              "when_noise_flag",
+              "mark"
+            ],
             "additionalProperties": false,
             "properties": {
-              "id": { "type": "string", "minLength": 1 },
-              "source": { "type": "string", "minLength": 1 },
-              "when_noise_flag": { "type": "boolean" },
-              "mark": { "type": "string", "enum": ["suspect", "artifact_likely"] }
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "source": {
+                "type": "string",
+                "minLength": 1
+              },
+              "when_noise_flag": {
+                "type": "boolean"
+              },
+              "mark": {
+                "type": "string",
+                "enum": [
+                  "suspect",
+                  "artifact_likely"
+                ]
+              }
             }
           }
         },
         "mechanism_map": {
           "type": "object",
-          "additionalProperties": { "type": "array", "items": { "type": "string", "minLength": 1 } }
-        }
-      }
-    },
-
-    "global_modifiers": {
-      "type": "object",
-      "required": ["content_type", "modifiers"],
-      "additionalProperties": false,
-      "properties": {
-        "content_type": { "type": "string", "enum": ["global_modifiers"] },
-        "modifiers": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": ["id", "min_severity", "when", "floor_tier"],
-            "additionalProperties": false,
-            "properties": {
-              "id": { "type": "string", "minLength": 1 },
-              "min_severity": { "$ref": "#/$defs/severity" },
-              "when": {
-                "type": "object",
-                "required": ["field", "op", "value"],
-                "additionalProperties": false,
-                "properties": {
-                  "field": { "type": "string", "minLength": 1 },
-                  "op": { "type": "string", "enum": ["gt", "gte", "lt", "lte", "eq"] },
-                  "value": {}
-                }
-              },
-              "floor_tier": { "$ref": "#/$defs/tier" }
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
             }
           }
         }
       }
     },
-
-    "recheck_intervals": {
+    "global_modifiers": {
       "type": "object",
-      "required": ["content_type", "by_tier"],
+      "required": [
+        "content_type",
+        "modifiers"
+      ],
       "additionalProperties": false,
       "properties": {
-        "content_type": { "type": "string", "enum": ["recheck_intervals"] },
-        "by_tier": {
-          "type": "object",
-          "required": ["D0", "D1", "D2", "D3", "D4", "D5"],
-          "additionalProperties": false,
-          "properties": {
-            "D0": { "type": "number", "minimum": 1 },
-            "D1": { "type": "number", "minimum": 1 },
-            "D2": { "type": "number", "minimum": 1 },
-            "D3": { "type": "number", "minimum": 1 },
-            "D4": { "type": "number", "minimum": 1 },
-            "D5": { "type": "number", "minimum": 1 }
+        "content_type": {
+          "type": "string",
+          "enum": [
+            "global_modifiers"
+          ]
+        },
+        "modifiers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "min_severity",
+              "when",
+              "floor_tier"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "min_severity": {
+                "$ref": "#/$defs/severity"
+              },
+              "when": {
+                "type": "object",
+                "required": [
+                  "field",
+                  "op",
+                  "value"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "field": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "op": {
+                    "type": "string",
+                    "enum": [
+                      "gt",
+                      "gte",
+                      "lt",
+                      "lte",
+                      "eq"
+                    ]
+                  },
+                  "value": {}
+                }
+              },
+              "floor_tier": {
+                "$ref": "#/$defs/tier"
+              }
+            }
           }
         }
       }
     },
-
-    "trajectory_rules": {
+    "recheck_intervals": {
       "type": "object",
-      "required": ["content_type", "window_min", "min_points", "metrics", "worsening_min_signals", "improving_min_signals"],
+      "required": [
+        "content_type",
+        "by_tier"
+      ],
       "additionalProperties": false,
       "properties": {
-        "content_type": { "type": "string", "enum": ["trajectory_rules"] },
-        "window_min": { "type": "number", "minimum": 1 },
-        "min_points": { "type": "integer", "minimum": 2 },
+        "content_type": {
+          "type": "string",
+          "enum": [
+            "recheck_intervals"
+          ]
+        },
+        "by_tier": {
+          "type": "object",
+          "required": [
+            "D0",
+            "D1",
+            "D2",
+            "D3",
+            "D4",
+            "D5"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "D0": {
+              "type": "number",
+              "minimum": 1
+            },
+            "D1": {
+              "type": "number",
+              "minimum": 1
+            },
+            "D2": {
+              "type": "number",
+              "minimum": 1
+            },
+            "D3": {
+              "type": "number",
+              "minimum": 1
+            },
+            "D4": {
+              "type": "number",
+              "minimum": 1
+            },
+            "D5": {
+              "type": "number",
+              "minimum": 1
+            }
+          }
+        }
+      }
+    },
+    "trajectory_rules": {
+      "type": "object",
+      "required": [
+        "content_type",
+        "window_min",
+        "min_points",
+        "metrics",
+        "worsening_min_signals",
+        "improving_min_signals"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "content_type": {
+          "type": "string",
+          "enum": [
+            "trajectory_rules"
+          ]
+        },
+        "window_min": {
+          "type": "number",
+          "minimum": 1
+        },
+        "min_points": {
+          "type": "integer",
+          "minimum": 2
+        },
         "metrics": {
           "type": "array",
           "minItems": 1,
           "items": {
             "type": "object",
-            "required": ["metric", "worse_direction", "slope_per_min"],
+            "required": [
+              "metric",
+              "worse_direction",
+              "slope_per_min"
+            ],
             "additionalProperties": false,
             "properties": {
-              "metric": { "type": "string", "minLength": 1 },
-              "worse_direction": { "type": "string", "enum": ["up", "down"] },
-              "slope_per_min": { "type": "number", "minimum": 0 }
+              "metric": {
+                "type": "string",
+                "minLength": 1
+              },
+              "worse_direction": {
+                "type": "string",
+                "enum": [
+                  "up",
+                  "down"
+                ]
+              },
+              "slope_per_min": {
+                "type": "number",
+                "minimum": 0
+              }
             }
           }
         },
-        "worsening_min_signals": { "type": "integer", "minimum": 1 },
-        "improving_min_signals": { "type": "integer", "minimum": 1 }
+        "worsening_min_signals": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "improving_min_signals": {
+          "type": "integer",
+          "minimum": 1
+        }
       }
     },
-
     "event_codes": {
       "type": "object",
-      "required": ["content_type", "codes"],
+      "required": [
+        "content_type",
+        "codes"
+      ],
       "additionalProperties": false,
       "properties": {
-        "content_type": { "type": "string", "enum": ["event_codes"] },
+        "content_type": {
+          "type": "string",
+          "enum": [
+            "event_codes"
+          ]
+        },
         "codes": {
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["event_id", "name"],
+            "required": [
+              "event_id",
+              "name"
+            ],
             "additionalProperties": false,
             "properties": {
-              "event_id": { "type": "string", "pattern": "^EV_[A-Z0-9_]+$" },
-              "name": { "type": "string", "minLength": 1 }
+              "event_id": {
+                "type": "string",
+                "pattern": "^EV_[A-Z0-9_]+$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1
+              }
             }
           }
         }

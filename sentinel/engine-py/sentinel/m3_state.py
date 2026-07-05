@@ -75,5 +75,5 @@ def compute_baselines(unit_profile, accepted, content, reference_time, needed_me
     for metric in sorted(baselines):
         b = baselines[metric]
         med = "none" if b["median"] is None else fmt_val(b["median"])
-        trace.append({"stage": "M3", "detail": f"baseline {metric}: {b['status']} (source={b['source']}, median={med}, n_obs={b['n_obs']})"})
+        trace.append({"stage": "M3", "detail": f"baseline {metric}: {b['status']} (source={b['source']}, median={med}, n_obs={fmt_val(b['n_obs'])})"})
     return baselines

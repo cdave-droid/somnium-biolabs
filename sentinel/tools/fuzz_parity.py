@@ -46,7 +46,7 @@ def random_case(rng: random.Random) -> dict:
     if rng.random() < 0.5:
         profile["baselines"] = {
             "cycle_rate": {"median": rng.randint(55, 95), "p10": 50, "p90": 100,
-                           "window_days": 14, "n_obs": rng.choice([2, 8, 40])},
+                           "window_days": 14, "n_obs": rng.choice([2, 8, 40, 40.0])},
         }
 
     n_obs = rng.randint(0, 30)
@@ -73,7 +73,8 @@ def random_case(rng: random.Random) -> dict:
                 obs["quality_meta"] = {"noise_flag": rng.random() < 0.5}
         elif kind < 0.85:
             obs = {"obs_id": f"o{i:03d}", "unit_id": profile["unit_id"], "timestamp": ts,
-                   "type": "responsiveness", "value": rng.choice(["R0", "R1", "R2", "R3", "R9"]),
+                   "type": "responsiveness",
+                   "value": rng.choice(["R0", "R1", "R2", "R3", "R9", 3.0, 2]),
                    "source": "manual_entry"}
         elif kind < 0.93:
             obs = {"obs_id": f"o{i:03d}", "unit_id": profile["unit_id"], "timestamp": ts,

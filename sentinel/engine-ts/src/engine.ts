@@ -486,16 +486,18 @@ export class Engine {
         covered.add(t);
       }
     }
+    // Any usable breach inside the content-defined window floors the tier
+    // — a breach must not vanish just because a newer in-range reading
+    // arrived afterwards (escalation bias; DECISIONS D13.5).
+    const niWindowS = content.tables["never_ignore"].window_min * 60;
     for (const bound of content.tables["never_ignore"].bounds) {
       const metric = bound.metric;
-      const series = accepted.filter((o) => o.type === metric);
-      let latestUsable: NormalizedObs | null = null;
-      for (const o of series) {
-        if (o.quality !== "artifact_likely" || o.mechanism_protected) {
-          latestUsable = o;
-        }
-      }
-      const confidentBreach = latestUsable !== null && breaches(bound, latestUsable.value, enums);
+      const series = accepted.filter(
+        (o) => o.type === metric && ref !== null && (ref as number) - niWindowS <= o.ts && o.ts <= (ref as number),
+      );
+      const confidentBreach = series.some(
+        (o) => (o.quality !== "artifact_likely" || o.mechanism_protected) && breaches(bound, o.value, enums),
+      );
       const artifactBreach = series.some(
         (o) => o.quality === "artifact_likely" && !o.mechanism_protected && breaches(bound, o.value, enums),
       );
@@ -579,16 +581,18 @@ export class Engine {
     }
     const actionTier = maxTier(tierCandidates);
 
-    // Trajectory (DECISIONS.md D11)
+    // Trajectory (DECISIONS.md D11): overrides from the top-severity
+    // matches win; ties among them resolve by escalation order.
     let trajectory = trajectoryBase;
     const overrides = matched
       .filter((m) => pyTruthy(m.sig.trajectory_override))
       .map((m) => m.sig.trajectory_override as string);
     if (overrides.length > 0) {
-      const top = matched[0]; // highest severity first (sorted in M5)
-      trajectory = pyTruthy(top.sig.trajectory_override)
-        ? (top.sig.trajectory_override as string)
-        : maxByTraj(overrides);
+      const topSeverity = matched[0].sig.severity;
+      const topOverrides = matched
+        .filter((m) => m.sig.severity === topSeverity && pyTruthy(m.sig.trajectory_override))
+        .map((m) => m.sig.trajectory_override as string);
+      trajectory = maxByTraj(topOverrides.length > 0 ? topOverrides : overrides);
     }
 
     // Confidence (DECISIONS.md D12). A signature that is not_evaluable

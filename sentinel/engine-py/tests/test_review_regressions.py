@@ -152,6 +152,72 @@ def test_emergency_output_carries_no_runtime_specific_names(content, monkeypatch
     assert out["reasoning_trace"] == [{"stage": "M8", "detail": "internal_error"}]
 
 
+def test_never_ignore_breach_earlier_in_window_still_floors(content):
+    """Finding: only the LATEST usable reading was tested against never-ignore
+    bounds, so a trusted breach vanished when a newer in-range reading
+    arrived. Any usable breach inside the content window must floor."""
+    obs = [
+        make_obs(0, "cycle_rate", 180, 12, 0),   # breaches ni_cycle_high (>=170, floor D4)
+        make_obs(1, "cycle_rate", 90, 13, 30),   # newer, in range
+    ]
+    out = Engine(content).evaluate({"unit_id": "u-1"}, obs, {"deployment": "fixed_site"})
+    assert "never_ignore_breach" in out["flags"]
+    assert out["action_tier"] >= "D4"
+    assert out["confidence"] == "insufficient"  # no matched signature covers it
+
+    # ...but a breach OUTSIDE the 240-min window does not fire.
+    old = [
+        make_obs(0, "cycle_rate", 180, 6, 0),    # 7.5 h before reference time
+        make_obs(1, "cycle_rate", 90, 13, 30),
+    ]
+    out = Engine(content).evaluate({"unit_id": "u-1"}, old, {"deployment": "fixed_site"})
+    assert "never_ignore_breach" not in out["flags"]
+
+
+def test_trajectory_override_tie_resolves_by_escalation_order(content, tmp_package):
+    """Finding: ties among same-severity matches resolved by lexicographic
+    signature id instead of D11's escalation order (worsening must win)."""
+    import json
+    import os
+    pkg, resign = tmp_package
+    base = {
+        "version": "1.0.0", "status": "published", "author": "t", "reviewers": ["t"],
+        "required_inputs": ["strain_0_10"], "severity": "S2",
+        "action_tier_by_context": {"default": "D2"},
+        "logic": {"all_of": [{"metric": "strain_0_10", "op": "gte", "value": 5, "window_min": 240}]},
+        "explanation_template": "strain elevated",
+    }
+    # lexicographically FIRST signature carries the WEAKER override
+    a = dict(base, signature_id="aa_strain_v1", name="a", trajectory_override="improving")
+    b = dict(base, signature_id="zz_strain_v1", name="z", trajectory_override="worsening")
+    for sig in (a, b):
+        with open(os.path.join(pkg, "signatures", f"{sig['signature_id']}.json"), "w", encoding="utf-8") as fh:
+            json.dump(sig, fh, indent=2)
+    resign()
+    from conftest import SCHEMA_DIR
+    from sentinel import load_content as lc
+    handle = lc(pkg, SCHEMA_DIR)
+    out = Engine(handle).evaluate({"unit_id": "u-1"},
+                                  [make_obs(0, "strain_0_10", 7, 13)],
+                                  {"deployment": "fixed_site"})
+    assert set(out["matched_signatures"]) == {"aa_strain_v1", "zz_strain_v1"}
+    assert out["trajectory"] == "worsening"
+
+
+def test_unicode_digit_timestamps_rejected(content):
+    """Finding: Python's \\d matched Arabic-Indic digits, accepting timestamps
+    engine-ts rejects — a parity break and garbage acceptance."""
+    from sentinel.timeutil import parse_ts
+    import pytest
+    with pytest.raises(ValueError):
+        parse_ts("٢٠٢٦-07-03T10:00:00Z")  # ٢٠٢٦
+    out = Engine(content).evaluate(
+        {"unit_id": "u-1"},
+        [{**make_obs(0, "cycle_rate", 80, 10), "timestamp": "٢٠٢٦-07-03T10:00:00Z"}],
+        {"deployment": "fixed_site"})
+    assert out["confidence"] == "insufficient"  # quarantined -> no observations
+
+
 def test_hostile_known_conditions_do_not_crash(content):
     """Finding (TS): mechanism_map['constructor'] resolved to a function and
     threw. Hostile profile strings must be inert."""

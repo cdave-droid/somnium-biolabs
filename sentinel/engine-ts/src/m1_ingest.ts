@@ -2,7 +2,7 @@
  * structurally invalid, physically impossible, or outside the controlled
  * vocabularies. Bounds and unit conversions are content, not code.
  */
-import { own, q6 } from "./canonical.js";
+import { fmtNum, own, q6 } from "./canonical.js";
 import { NUMERIC_TYPES, OBSERVATION_TYPES } from "./constants.js";
 import type { ContentHandle } from "./content.js";
 import { parseTs } from "./timeutil.js";
@@ -205,10 +205,13 @@ export function ingest(
   return [accepted, quarantined, notes];
 }
 
-/** Python str() of an arbitrary quarantine-reason value (None → "None"). */
+/** Python str()/fmt_val of an arbitrary quarantine-reason value (None →
+ * "None"; numbers via the shared formatter so 3.0 renders "3" in BOTH
+ * runtimes — Python str(3.0) would be "3.0"). */
 function pyStrOpt(v: unknown): string {
   if (v === null || v === undefined) return "None";
   if (v === true) return "True";
   if (v === false) return "False";
+  if (typeof v === "number" && Number.isFinite(v)) return fmtNum(v);
   return String(v);
 }

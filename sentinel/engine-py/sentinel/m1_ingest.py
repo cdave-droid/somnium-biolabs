@@ -4,7 +4,7 @@ vocabularies. Bounds and unit conversions are content, not code.
 """
 from __future__ import annotations
 
-from .canonical import q6
+from .canonical import fmt_val, q6
 from .constants import NUMERIC_TYPES, OBSERVATION_TYPES
 from .timeutil import parse_ts
 
@@ -92,7 +92,9 @@ def ingest(observations, content, flags):
         value = obs.get("value")
         if otype in enums:
             if value not in enums[otype]:
-                _quarantine(quarantined, obs, f"invalid_value:{value}")
+                # fmt_val keeps numeric interpolation byte-identical with
+                # engine-ts (Python str(3.0) is "3.0"; JS String(3.0) is "3").
+                _quarantine(quarantined, obs, f"invalid_value:{fmt_val(value)}")
                 continue
             norm["value"] = value
         elif otype in NUMERIC_TYPES:
