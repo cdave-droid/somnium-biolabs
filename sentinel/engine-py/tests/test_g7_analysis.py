@@ -113,7 +113,11 @@ def test_redteam_suite_holds(content):
         [sys.executable, os.path.join(SENTINEL_ROOT, "analysis", "run_redteam.py")],
         capture_output=True, text=True)
     assert proc.returncode == 0, proc.stdout + proc.stderr
-    assert "12/12" in proc.stdout
+    # the suite is grow-only; assert full pass without pinning the count
+    assert "FAIL" not in proc.stdout
+    import re
+    m = re.search(r"(\d+)/(\d+) cases hold", proc.stdout)
+    assert m and m.group(1) == m.group(2), proc.stdout
 
 
 def test_local_pipeline_end_to_end(content, tmp_path):
