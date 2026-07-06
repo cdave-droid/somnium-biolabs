@@ -229,7 +229,7 @@ class Engine:
                                                stored_baselines=stored_baselines)
 
         # M4 — features & trajectory
-        features = Features(accepted, content, ref)
+        features = Features(accepted, content, ref, flags)
         trajectory_base = classify_trajectory(features, content, trace)
 
         # M5 — signatures
@@ -339,7 +339,8 @@ class Engine:
         elif flags & {"baseline_population_default", "baseline_unavailable", "suspect_inputs_present",
                       "data_rejected", "missing_context", "artifact_suspected_any_input",
                       "artifact_with_mechanism", "duplicate_obs_id", "baseline_zero_division",
-                      "invalid_profile_fields", "invalid_context_fields"} or quality_ne:
+                      "invalid_profile_fields", "invalid_context_fields",
+                      "stream_untrusted", "stream_disagreement", "pooled_streams"} or quality_ne:
             confidence = "degraded"
         else:
             confidence = "high"

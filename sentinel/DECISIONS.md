@@ -209,6 +209,36 @@ open item in GAPS.md. Unsigned/`none` packages load but set flag
 - Lone UTF-16 surrogates in any input string canonicalize to U+FFFD in both
   runtimes.
 
+## D19. Multi-stream handling (per-stream screening, explicit fusion)
+
+A **stream** is one device/channel: `Observation.stream_id` if present, else
+the `source` class. Multiple streams may report the same metric at different
+frequencies. Rules:
+
+1. **Screen per stream first.** Waveform-shape rules (impossible-jump,
+   spike-and-recover) run WITHIN one (metric, stream) series only — comparing
+   readings across devices manufactures artifacts out of ordinary
+   inter-device offsets.
+2. **Per-stream trust verdict.** A stream whose readings are dominated by
+   artifact shapes (content: `stream_screening.max_artifact_fraction` per
+   source, with `min_points_for_distrust`) is distrusted wholesale — its
+   remaining readings are downgraded to artifact_likely (`stream_untrusted`
+   flag) rather than believed selectively. Distrusted readings that breach
+   never-ignore bounds still escalate via the on-artifact path (D13.5) —
+   distrust never silently discards a critical value.
+3. **Cross-stream reconciliation.** Near-simultaneous usable readings of the
+   same metric disagreeing beyond content tolerance → `stream_disagreement`
+   flag, lower-trust reading marked suspect, confidence degraded. Trust order
+   is content (`source_priority`).
+4. **Fusion for logic.** Each windowed computation uses the highest-trust
+   single stream that can answer on its own. Pooling readings across streams
+   is a last resort (no single stream has enough points), is always flagged
+   (`pooled_streams`, degrades confidence), and never silent — inter-device
+   offsets masquerade as trends.
+5. Errors remain attributable: quarantine reasons are per observation,
+   quality labels per reading, trust verdicts per stream (in the trace by
+   stream name), and case flags summarize per-case.
+
 ## D17. Layout deviation
 
 The spec assumes SENTINEL owns the repo root; this repository already hosts a

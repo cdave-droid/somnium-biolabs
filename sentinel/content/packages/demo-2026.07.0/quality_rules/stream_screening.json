@@ -1,0 +1,11 @@
+{
+  "content_type": "stream_screening",
+  "source_priority": ["inline_gauge", "fixed_monitor", "manual_entry", "event_report", "wearable_sensor"],
+  "max_artifact_fraction": { "default": 0.5, "wearable_sensor": 0.34 },
+  "min_points_for_distrust": 3,
+  "disagreement": {
+    "window_s": 600,
+    "tolerance_pct": { "default": 10 },
+    "tolerance_abs": { "saturation_pct": 4, "temperature_c": 0.5, "strain_0_10": 2 }
+  }
+}

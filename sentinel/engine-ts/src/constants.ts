@@ -44,6 +44,8 @@ export const REFERENCEABLE_FLAGS = [
   "baseline_unavailable",
   "data_rejected",
   "missing_context",
+  "stream_disagreement",
+  "stream_untrusted",
   "suspect_inputs_present",
 ];
 
@@ -67,7 +69,10 @@ export const FLAG_TEXTS: Record<string, string> = {
   "never_ignore_breach_on_artifact": "A reading breached a never-ignore absolute bound but looks like a sensor artifact; the engine escalated instead of dismissing it — re-measure immediately.",
   "never_ignore_breach_on_rejected": "A physically-impossible reading also breached a never-ignore bound; it may be a real extreme value or sensor garbage — re-measure immediately.",
   "no_baseline_history": "This unit had insufficient observation history to compute personalized baselines.",
+  "pooled_streams": "No single data stream had enough points for a trend; readings from multiple streams were pooled, which can distort trends — treat trend-based findings with caution.",
   "signatures_not_evaluable": "One or more signatures could not be evaluated for this case (missing inputs or insufficient data).",
+  "stream_disagreement": "Two data streams disagreed materially on the same metric at the same time; the higher-trust source was preferred — re-measure to resolve the conflict.",
+  "stream_untrusted": "A data stream was distrusted because too many of its recent readings were artifact-flagged; its readings were excluded pending re-verification.",
   "suspect_inputs_present": "One or more readings were quality-flagged as suspect but were still used.",
   "unit_silent": "No observation has arrived within this unit's expected reporting cadence; the engine cannot evaluate a unit it cannot hear.",
   "unknown_event_code": "An event report used a code that is not in the controlled vocabulary; the engine cannot interpret it.",

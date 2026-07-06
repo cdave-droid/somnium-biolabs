@@ -374,6 +374,69 @@
           "never_ignore_breach_on_artifact"
         ]
       }
+    },
+    {
+      "name": "interleaved_streams_do_not_manufacture_artifacts",
+      "rationale": "two steady devices with an inter-device offset, interleaved at high frequency: per-stream screening must not misread the merged series as impossible jumps (adversarial-review class: false artifacts from stream interleaving).",
+      "input": {
+        "unit_profile": {
+          "unit_id": "rt-1"
+        },
+        "observations": [
+          {
+            "obs_id": "o000",
+            "unit_id": "rt-1",
+            "timestamp": "2026-07-03T13:00:00Z",
+            "type": "cycle_rate",
+            "value": 128,
+            "source": "fixed_monitor"
+          },
+          {
+            "obs_id": "o001",
+            "unit_id": "rt-1",
+            "timestamp": "2026-07-03T13:00:05Z",
+            "type": "cycle_rate",
+            "value": 76,
+            "source": "wearable_sensor"
+          },
+          {
+            "obs_id": "o002",
+            "unit_id": "rt-1",
+            "timestamp": "2026-07-03T13:00:10Z",
+            "type": "cycle_rate",
+            "value": 130,
+            "source": "fixed_monitor"
+          },
+          {
+            "obs_id": "o003",
+            "unit_id": "rt-1",
+            "timestamp": "2026-07-03T13:00:15Z",
+            "type": "cycle_rate",
+            "value": 78,
+            "source": "wearable_sensor"
+          },
+          {
+            "obs_id": "o004",
+            "unit_id": "rt-1",
+            "timestamp": "2026-07-03T13:00:20Z",
+            "type": "cycle_rate",
+            "value": 132,
+            "source": "fixed_monitor"
+          }
+        ],
+        "context": {
+          "deployment": "fixed_site"
+        }
+      },
+      "expect": {
+        "flags_exclude": [
+          "artifact_suspected_any_input"
+        ],
+        "flags_include": [
+          "stream_disagreement"
+        ],
+        "confidence": "degraded"
+      }
     }
   ]
 }

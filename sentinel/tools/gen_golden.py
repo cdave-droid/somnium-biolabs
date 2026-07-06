@@ -167,6 +167,28 @@ CASES = {
         "assert": {"severity": "S4", "action_tier": "D5",
                    "matched_signatures": ["unresponsive_unit_v1"]},  # default tier, prototype keys inert
     },
+    "multi_stream_interleaved_no_false_artifact": {
+        "input": {"unit_profile": {"unit_id": "u-006"},
+                  "observations": [
+                      O(0, "cycle_rate", 128, "2026-07-03T13:00:00Z"),
+                      {**O(1, "cycle_rate", 76, "2026-07-03T13:00:05Z", source="wearable_sensor")},
+                      O(2, "cycle_rate", 130, "2026-07-03T13:00:10Z"),
+                      {**O(3, "cycle_rate", 78, "2026-07-03T13:00:15Z", source="wearable_sensor")},
+                      O(4, "cycle_rate", 132, "2026-07-03T13:00:20Z")],
+                  "context": FIXED, "reference_time": None},
+        "assert": {"confidence": "degraded", "matched_signatures": []},
+        # interleaved offset streams must NOT manufacture jump artifacts;
+        # the inter-device disagreement is flagged instead
+    },
+    "multi_stream_disagreement_prefers_monitor": {
+        "input": {"unit_profile": {"unit_id": "u-007"},
+                  "observations": [
+                      {**O(0, "saturation_pct", 82, "2026-07-03T13:00:00Z", source="wearable_sensor")},
+                      O(1, "saturation_pct", 96, "2026-07-03T13:01:00Z")],
+                  "context": FIXED, "reference_time": None},
+        "assert": {"matched_signatures": [], "confidence": "degraded"},
+        # higher-trust monitor wins for logic; conflict surfaced, never silent
+    },
     # -- healthy path ----------------------------------------------------
     "healthy_stable": {
         "input": {"unit_profile": PROFILE,

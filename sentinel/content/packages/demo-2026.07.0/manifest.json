@@ -43,6 +43,10 @@
       "sha256": "c7a6b8a29e92978e8d5fd2ebd9c788c4c5739cf01d4b283070a968991f3be1e3"
     },
     {
+      "path": "quality_rules/stream_screening.json",
+      "sha256": "70682716f04640b3d84e322a1b39403d7018fc0d301589b0bb7efbca5098a06e"
+    },
+    {
       "path": "signatures/compensated_stress_v1.json",
       "sha256": "d4810e79f3c90216731c90101822a2d105df6bf07f9f13ef45c83d4dbf07df28"
     },
@@ -79,5 +83,5 @@
       "sha256": "a83785f92378b324af325e2c9d68f382d244820c48e141b470e56b08545ed055"
     }
   ],
-  "package_hash": "bc8b18e1e64b38ed74f960eafabfde04a4a1e23d81d80deeb0c06e770f759ca2"
+  "package_hash": "2986aa68b8f704df6be12cee187b463fd9bfaf2bb9b96e9052eaf22caeac0e56"
 }

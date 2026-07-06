@@ -832,6 +832,79 @@
           }
         }
       }
+    },
+    "stream_screening": {
+      "type": "object",
+      "required": [
+        "content_type",
+        "source_priority",
+        "max_artifact_fraction",
+        "min_points_for_distrust",
+        "disagreement"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "content_type": {
+          "type": "string",
+          "enum": [
+            "stream_screening"
+          ]
+        },
+        "source_priority": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "max_artifact_fraction": {
+          "type": "object",
+          "required": [
+            "default"
+          ],
+          "additionalProperties": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        },
+        "min_points_for_distrust": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "disagreement": {
+          "type": "object",
+          "required": [
+            "window_s",
+            "tolerance_pct"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "window_s": {
+              "type": "number",
+              "minimum": 1
+            },
+            "tolerance_pct": {
+              "type": "object",
+              "required": [
+                "default"
+              ],
+              "additionalProperties": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "tolerance_abs": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "number",
+                "minimum": 0
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

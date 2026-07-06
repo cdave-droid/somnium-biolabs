@@ -59,12 +59,21 @@ def ingest(observations, content, flags):
             _quarantine(quarantined, obs, "invalid_timestamp")
             continue
 
+        stream_id = obs.get("stream_id")
+        if stream_id is not None:
+            if not isinstance(stream_id, str) or not stream_id or not stream_id.isascii():
+                _quarantine(quarantined, obs, "invalid_structure:stream_id")
+                continue
+
         norm = {
             "obs_id": obs_id,
             "ts": ts,
             "timestamp": obs["timestamp"],
             "type": otype,
             "source": source,
+            # Stream identity: device/channel instance if given, else the
+            # source class. All per-stream screening keys off this (D19).
+            "stream": stream_id if stream_id is not None else source,
             "quality_meta": obs.get("quality_meta") or {},
         }
 

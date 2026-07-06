@@ -24,6 +24,7 @@ export interface NormalizedObs {
   timestamp: string;
   type: string;
   source: string;
+  stream: string;
   quality_meta: any;
   text?: string;
   event_id?: string;
@@ -118,12 +119,23 @@ export function ingest(
       continue;
     }
 
+    const streamId = obs.stream_id;
+    if (streamId !== null && streamId !== undefined) {
+      if (typeof streamId !== "string" || streamId === "" || !/^[\x00-\x7f]*$/.test(streamId)) {
+        quarantine(quarantined, obs, "invalid_structure:stream_id");
+        continue;
+      }
+    }
+
     const norm: NormalizedObs = {
       obs_id: obsId,
       ts,
       timestamp: obs.timestamp,
       type: otype,
       source,
+      // Stream identity: device/channel instance if given, else the
+      // source class. All per-stream screening keys off this (D19).
+      stream: streamId !== null && streamId !== undefined ? streamId : source,
       quality_meta: orEmpty(obs.quality_meta),
     };
 

@@ -498,7 +498,7 @@ export class Engine {
     const baselines = computeBaselines(unitProfile, accepted, content, ref as number, needed, flags, trace, storedBaselines);
 
     // M4 — features & trajectory
-    const features = new Features(accepted, content, ref as number);
+    const features = new Features(accepted, content, ref as number, flags);
     const trajectoryBase = classifyTrajectory(features, content, trace);
 
     // M5 — signatures
@@ -648,6 +648,9 @@ export class Engine {
       "baseline_zero_division",
       "invalid_profile_fields",
       "invalid_context_fields",
+      "stream_untrusted",
+      "stream_disagreement",
+      "pooled_streams",
     ];
     let confidence: string;
     if (m8Active) {

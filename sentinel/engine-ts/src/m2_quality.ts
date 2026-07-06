@@ -1,8 +1,14 @@
 /** M2 — Signal-Quality Assessor. Deterministic artifact heuristics from
  * content files. Never deletes data — annotates quality and lets downstream
  * modules weight it (DECISIONS.md D7).
+ *
+ * Screening is PER STREAM first (DECISIONS.md D19): every (metric, stream)
+ * pair is screened on its own — waveform-shape rules never compare readings
+ * from different devices, a stream with too many artifacts is distrusted
+ * wholesale, and only then are streams reconciled against each other
+ * (disagreement) and against other metrics (cross-signal contradiction).
  */
-import { own, pyTruthy } from "./canonical.js";
+import { fmtVal, own, pyTruthy } from "./canonical.js";
 import { NUMERIC_TYPES } from "./constants.js";
 import type { ContentHandle } from "./content.js";
 import type { NormalizedObs } from "./m1_ingest.js";
@@ -23,6 +29,29 @@ function mark(obs: NormalizedObs, level: string, ruleId: string): void {
 
 function series(accepted: NormalizedObs[], metric: string): NormalizedObs[] {
   return accepted.filter((o) => o.type === metric);
+}
+
+/** (metric, stream) grouping in deterministic stream order — the unit of
+ * individual screening. Observations arrive already (ts, obs_id)-sorted. */
+function seriesByStream(accepted: NormalizedObs[], metric: string): Array<[string, NormalizedObs[]]> {
+  const groups = new Map<string, NormalizedObs[]>();
+  for (const o of accepted) {
+    if (o.type === metric) {
+      const arr = groups.get(o.stream);
+      if (arr === undefined) {
+        groups.set(o.stream, [o]);
+      } else {
+        arr.push(o);
+      }
+    }
+  }
+  return Array.from(groups.keys()).sort().map((stream) => [stream, groups.get(stream)!] as [string, NormalizedObs[]]);
+}
+
+function sourcePriority(screening: any, source: string): number {
+  const order: string[] = screening.source_priority;
+  const idx = order.indexOf(source);
+  return idx >= 0 ? idx : order.length;
 }
 
 function latestPlausibleAt(
@@ -97,6 +126,7 @@ export function assess(
   trace: Array<{ stage: string; detail: string }>,
 ): [Set<string>, Set<string>] {
   const rules = content.tables["artifact_rules"];
+  const screening = content.tables["stream_screening"];
   const enums = content.tables["operational_bounds"].enums;
 
   for (const o of accepted) {
@@ -105,8 +135,16 @@ export function assess(
     o.mechanism_protected = false;
   }
 
-  // Rule order is fixed for determinism: source_prior, impossible_jump,
-  // spike_and_recover, cross_contradiction.
+  const numericMetrics = Array.from(
+    new Set(accepted.filter((o) => NUMERIC_TYPES.includes(o.type)).map((o) => o.type)),
+  ).sort();
+  const screenableMetrics = Array.from(
+    new Set(accepted.filter((o) => NUMERIC_TYPES.includes(o.type) || own(enums, o.type)).map((o) => o.type)),
+  ).sort();
+
+  // Rule order is fixed for determinism: source_prior, per-stream
+  // impossible_jump, per-stream spike_and_recover, per-stream distrust,
+  // cross-stream disagreement, cross-signal contradiction.
   for (const rule of rules.source_prior) {
     for (const o of accepted) {
       const qm = o.quality_meta;
@@ -120,41 +158,116 @@ export function assess(
     }
   }
 
+  // Waveform-shape rules run WITHIN one stream only: readings from two
+  // devices are different signals, and comparing them manufactures
+  // artifacts out of ordinary inter-device offsets.
   for (const rule of rules.impossible_jump) {
-    const s = series(accepted, rule.metric);
-    for (let i = 1; i < s.length; i++) {
-      const prev = s[i - 1];
-      const cur = s[i];
-      const dt = cur.ts - prev.ts;
-      if (dt <= 0) {
-        if (cur.value !== prev.value) {
-          mark(prev, "artifact_likely", rule.id + ":simultaneous_conflict");
-          mark(cur, "artifact_likely", rule.id + ":simultaneous_conflict");
+    for (const [, s] of seriesByStream(accepted, rule.metric)) {
+      for (let i = 1; i < s.length; i++) {
+        const prev = s[i - 1];
+        const cur = s[i];
+        const dt = cur.ts - prev.ts;
+        if (dt <= 0) {
+          if (cur.value !== prev.value) {
+            mark(prev, "artifact_likely", rule.id + ":simultaneous_conflict");
+            mark(cur, "artifact_likely", rule.id + ":simultaneous_conflict");
+          }
+          continue;
         }
-        continue;
-      }
-      if (Math.abs(cur.value - prev.value) / dt > rule.max_change_per_s) {
-        mark(cur, "artifact_likely", rule.id);
+        if (Math.abs(cur.value - prev.value) / dt > rule.max_change_per_s) {
+          mark(cur, "artifact_likely", rule.id);
+        }
       }
     }
   }
 
   for (const rule of rules.spike_and_recover) {
-    const s = series(accepted, rule.metric);
-    for (let i = 1; i < s.length - 1; i++) {
-      const a = s[i - 1];
-      const b = s[i];
-      const c = s[i + 1];
-      if (c.ts - a.ts > rule.window_s) {
+    for (const [, s] of seriesByStream(accepted, rule.metric)) {
+      for (let i = 1; i < s.length - 1; i++) {
+        const a = s[i - 1];
+        const b = s[i];
+        const c = s[i + 1];
+        if (c.ts - a.ts > rule.window_s) {
+          continue;
+        }
+        if (a.value <= 0) {
+          continue;
+        }
+        const dropped = b.value <= a.value * (1 - rule.drop_pct / 100.0);
+        const recovered = c.value >= a.value * (rule.recovery_pct / 100.0);
+        if (dropped && recovered) {
+          mark(b, "artifact_likely", rule.id);
+        }
+      }
+    }
+  }
+
+  // Per-stream trust verdict: a stream whose recent readings are dominated
+  // by artifact shapes is not a signal to be believed selectively — its
+  // remaining readings are downgraded wholesale until it is re-verified.
+  for (const metric of screenableMetrics) {
+    for (const [stream, s] of seriesByStream(accepted, metric)) {
+      const n = s.length;
+      if (n < screening.min_points_for_distrust) {
         continue;
       }
-      if (a.value <= 0) {
+      const artifactN = s.filter((o) => o.quality === "artifact_likely").length;
+      const source = s[s.length - 1].source;
+      const maxFrac = own(screening.max_artifact_fraction, source)
+        ? screening.max_artifact_fraction[source]
+        : screening.max_artifact_fraction.default;
+      if (artifactN / n >= maxFrac && artifactN > 0) {
+        for (const o of s) {
+          mark(o, "artifact_likely", "stream_untrusted");
+        }
+        flags.add("stream_untrusted");
+        trace.push({
+          stage: "M2",
+          detail: `stream ${stream}/${metric} distrusted (${artifactN}/${n} readings artifact-flagged); all its readings excluded pending re-verification`,
+        });
+      }
+    }
+  }
+
+  // Cross-stream reconciliation: near-simultaneous usable readings of the
+  // SAME metric from different streams that disagree beyond tolerance. The
+  // lower-trust reading becomes suspect; the disagreement is always flagged.
+  const disagreement = screening.disagreement;
+  for (const metric of numericMetrics) {
+    const streams: Array<[number, string, NormalizedObs]> = [];
+    for (const [stream, s] of seriesByStream(accepted, metric)) {
+      const usable = s.filter((o) => o.quality !== "artifact_likely");
+      if (usable.length > 0) {
+        const latest = usable[usable.length - 1];
+        streams.push([sourcePriority(screening, latest.source), stream, latest]);
+      }
+    }
+    if (streams.length < 2) {
+      continue;
+    }
+    streams.sort((a, b) => a[0] - b[0] || (a[1] < b[1] ? -1 : a[1] > b[1] ? 1 : 0));
+    const anchor = streams[0][2];
+    const tolAbs = own(disagreement.tolerance_abs ?? {}, metric) ? disagreement.tolerance_abs[metric] : null;
+    for (const [, , other] of streams.slice(1)) {
+      if (Math.abs(other.ts - anchor.ts) > disagreement.window_s) {
         continue;
       }
-      const dropped = b.value <= a.value * (1 - rule.drop_pct / 100.0);
-      const recovered = c.value >= a.value * (rule.recovery_pct / 100.0);
-      if (dropped && recovered) {
-        mark(b, "artifact_likely", rule.id);
+      let tolerance: number;
+      if (tolAbs !== null) {
+        tolerance = tolAbs;
+      } else {
+        const pct = own(disagreement.tolerance_pct, metric)
+          ? disagreement.tolerance_pct[metric]
+          : disagreement.tolerance_pct.default;
+        tolerance = (Math.abs(anchor.value) * pct) / 100.0;
+      }
+      if (Math.abs(other.value - anchor.value) > tolerance) {
+        mark(other, "suspect", "stream_disagreement");
+        flags.add("stream_disagreement");
+        trace.push({
+          stage: "M2",
+          detail: `stream disagreement on ${metric}: ${anchor.stream}=${fmtVal(anchor.value)} vs ${other.stream}=${fmtVal(other.value)} within ${fmtVal(disagreement.window_s)}s; higher-trust source preferred — re-measure to resolve`,
+        });
       }
     }
   }

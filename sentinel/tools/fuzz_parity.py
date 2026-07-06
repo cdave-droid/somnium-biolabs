@@ -67,6 +67,8 @@ def random_case(rng: random.Random) -> dict:
             value = round(rng.uniform(lo, hi), rng.choice([0, 1, 3]))
             obs = {"obs_id": f"o{i:03d}", "unit_id": profile["unit_id"], "timestamp": ts,
                    "type": metric, "value": value, "source": rng.choice(SOURCES)}
+            if rng.random() < 0.25:  # explicit device ids exercise stream fusion
+                obs["stream_id"] = rng.choice(["dev-A", "dev-B", "dev-C", "dev-\u00e9"])
             if rng.random() < 0.1:
                 obs["unit"] = rng.choice(["f", "lb", "kpa", "bogus_unit"])
             if rng.random() < 0.15:
