@@ -23,6 +23,10 @@ jobs:
         run: python sentinel/tools/gen_golden.py --check
       - name: Signature coverage report
         run: python sentinel/tools/coverage_report.py
+      - name: Red-team suite (§7.4)
+        run: python sentinel/analysis/run_redteam.py
+      - name: Local pipeline end-to-end
+        run: python sentinel/tools/local_pipeline.py
 
   typescript:
     runs-on: ubuntu-latest

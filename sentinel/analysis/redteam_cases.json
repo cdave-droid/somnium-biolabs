@@ -1,0 +1,379 @@
+{
+  "description": "Red-team suite (spec §7.4): adversarial cases pinning boundary-exact values, subtle unit errors, and plausible-but-wrong inputs. This suite only grows: no bug or near-miss closes without adding its case.",
+  "cases": [
+    {
+      "name": "boundary_saturation_exactly_at_threshold_85",
+      "rationale": "lte comparators are inclusive; exactly-at-threshold must fire.",
+      "input": {
+        "unit_profile": {
+          "unit_id": "rt-1"
+        },
+        "observations": [
+          {
+            "obs_id": "o000",
+            "unit_id": "rt-1",
+            "timestamp": "2026-07-03T13:00:00Z",
+            "type": "saturation_pct",
+            "value": 85,
+            "source": "fixed_monitor"
+          }
+        ],
+        "context": {
+          "deployment": "fixed_site"
+        }
+      },
+      "expect": {
+        "matched_includes": [
+          "low_saturation_critical_v1"
+        ],
+        "min_action_tier": "D5"
+      }
+    },
+    {
+      "name": "boundary_saturation_just_above_threshold",
+      "rationale": "85.5 must NOT fire the lte-85 signature; healthy path.",
+      "input": {
+        "unit_profile": {
+          "unit_id": "rt-1"
+        },
+        "observations": [
+          {
+            "obs_id": "o000",
+            "unit_id": "rt-1",
+            "timestamp": "2026-07-03T13:00:00Z",
+            "type": "saturation_pct",
+            "value": 85.5,
+            "source": "fixed_monitor"
+          }
+        ],
+        "context": {
+          "deployment": "fixed_site"
+        }
+      },
+      "expect": {
+        "matched_excludes": [
+          "low_saturation_critical_v1"
+        ],
+        "max_action_tier": "D0"
+      }
+    },
+    {
+      "name": "boundary_cycle_exactly_at_never_ignore_170",
+      "rationale": "gte bound is inclusive; a single 170 with no matching signature must route to M8 with the bound floor.",
+      "input": {
+        "unit_profile": {
+          "unit_id": "rt-1"
+        },
+        "observations": [
+          {
+            "obs_id": "o000",
+            "unit_id": "rt-1",
+            "timestamp": "2026-07-03T13:00:00Z",
+            "type": "cycle_rate",
+            "value": 170,
+            "source": "fixed_monitor"
+          }
+        ],
+        "context": {
+          "deployment": "fixed_site"
+        }
+      },
+      "expect": {
+        "confidence": "insufficient",
+        "min_action_tier": "D4",
+        "flags_include": [
+          "never_ignore_breach"
+        ]
+      }
+    },
+    {
+      "name": "boundary_cycle_just_below_never_ignore",
+      "rationale": "169.9 breaches nothing; a single reading matches nothing.",
+      "input": {
+        "unit_profile": {
+          "unit_id": "rt-1"
+        },
+        "observations": [
+          {
+            "obs_id": "o000",
+            "unit_id": "rt-1",
+            "timestamp": "2026-07-03T13:00:00Z",
+            "type": "cycle_rate",
+            "value": 169.9,
+            "source": "fixed_monitor"
+          }
+        ],
+        "context": {
+          "deployment": "fixed_site"
+        }
+      },
+      "expect": {
+        "max_action_tier": "D0",
+        "flags_exclude": [
+          "never_ignore_breach"
+        ]
+      }
+    },
+    {
+      "name": "sustained_threshold_exactly_130_is_not_above",
+      "rationale": "sustained_for_min 'above' is strict (> threshold); exactly-at must not count as sustained elevation.",
+      "input": {
+        "unit_profile": {
+          "unit_id": "rt-1"
+        },
+        "observations": [
+          {
+            "obs_id": "o000",
+            "unit_id": "rt-1",
+            "timestamp": "2026-07-03T12:00:00Z",
+            "type": "cycle_rate",
+            "value": 130,
+            "source": "fixed_monitor"
+          },
+          {
+            "obs_id": "o001",
+            "unit_id": "rt-1",
+            "timestamp": "2026-07-03T13:00:00Z",
+            "type": "cycle_rate",
+            "value": 130,
+            "source": "fixed_monitor"
+          }
+        ],
+        "context": {
+          "deployment": "fixed_site"
+        }
+      },
+      "expect": {
+        "matched_excludes": [
+          "high_cycle_rate_simple_v1"
+        ],
+        "max_action_tier": "D0"
+      }
+    },
+    {
+      "name": "unit_error_pressure_reported_in_kpa",
+      "rationale": "16 kPa is a plausible transcription of 120 torr; the conversion table must normalize it instead of treating 16 as a catastrophic raw value. With only one reading no signature can evaluate, so the honest-failure D2 floor is the correct ceiling — the pin is that NO breach/rejection fires.",
+      "input": {
+        "unit_profile": {
+          "unit_id": "rt-1"
+        },
+        "observations": [
+          {
+            "obs_id": "o000",
+            "unit_id": "rt-1",
+            "timestamp": "2026-07-03T13:00:00Z",
+            "type": "pressure_primary",
+            "value": 16,
+            "unit": "kpa",
+            "source": "manual_entry"
+          }
+        ],
+        "context": {
+          "deployment": "fixed_site"
+        }
+      },
+      "expect": {
+        "max_action_tier": "D2",
+        "confidence": "insufficient",
+        "flags_exclude": [
+          "never_ignore_breach",
+          "never_ignore_breach_on_rejected",
+          "data_rejected"
+        ]
+      }
+    },
+    {
+      "name": "unit_error_pressure_raw_16_escalates",
+      "rationale": "the SAME number without the kPa unit is physically impossible AND breaches the never-ignore low bound — it must escalate, not vanish in quarantine.",
+      "input": {
+        "unit_profile": {
+          "unit_id": "rt-1"
+        },
+        "observations": [
+          {
+            "obs_id": "o000",
+            "unit_id": "rt-1",
+            "timestamp": "2026-07-03T13:00:00Z",
+            "type": "pressure_primary",
+            "value": 16,
+            "source": "manual_entry"
+          }
+        ],
+        "context": {
+          "deployment": "fixed_site"
+        }
+      },
+      "expect": {
+        "confidence": "insufficient",
+        "min_action_tier": "D5",
+        "flags_include": [
+          "never_ignore_breach_on_rejected"
+        ]
+      }
+    },
+    {
+      "name": "responsiveness_exactly_R2_fires",
+      "rationale": "ordinal gte is inclusive at the boundary level.",
+      "input": {
+        "unit_profile": {
+          "unit_id": "rt-1"
+        },
+        "observations": [
+          {
+            "obs_id": "o000",
+            "unit_id": "rt-1",
+            "timestamp": "2026-07-03T13:00:00Z",
+            "type": "responsiveness",
+            "value": "R2",
+            "source": "manual_entry"
+          }
+        ],
+        "context": {
+          "deployment": "fixed_site"
+        }
+      },
+      "expect": {
+        "matched_includes": [
+          "unresponsive_unit_v1"
+        ],
+        "min_action_tier": "D5"
+      }
+    },
+    {
+      "name": "noisy_wearable_reading_still_counts",
+      "rationale": "a noise-flagged wearable reading is suspect, not discardable — a critical value on a noisy sensor must still fire, at degraded confidence.",
+      "input": {
+        "unit_profile": {
+          "unit_id": "rt-1"
+        },
+        "observations": [
+          {
+            "obs_id": "o000",
+            "unit_id": "rt-1",
+            "timestamp": "2026-07-03T13:00:00Z",
+            "type": "saturation_pct",
+            "value": 82,
+            "source": "wearable_sensor",
+            "quality_meta": {
+              "noise_flag": true
+            }
+          }
+        ],
+        "context": {
+          "deployment": "fixed_site"
+        }
+      },
+      "expect": {
+        "matched_includes": [
+          "low_saturation_critical_v1"
+        ],
+        "min_action_tier": "D5",
+        "confidence": "degraded"
+      }
+    },
+    {
+      "name": "reference_time_before_all_observations",
+      "rationale": "an explicit as-of instant earlier than every reading leaves all windows empty — the engine must say so honestly, not evaluate the future.",
+      "input": {
+        "unit_profile": {
+          "unit_id": "rt-1"
+        },
+        "observations": [
+          {
+            "obs_id": "o000",
+            "unit_id": "rt-1",
+            "timestamp": "2026-07-03T13:00:00Z",
+            "type": "saturation_pct",
+            "value": 60,
+            "source": "fixed_monitor"
+          }
+        ],
+        "context": {
+          "deployment": "fixed_site"
+        },
+        "reference_time": "2026-07-01T00:00:00Z"
+      },
+      "expect": {
+        "confidence": "insufficient",
+        "min_action_tier": "D2"
+      }
+    },
+    {
+      "name": "mass_in_pounds_converts_cleanly",
+      "rationale": "180 lb must convert to ~81.6 kg, not read as an impossible raw value. With only one reading no signature can evaluate (honest-failure D2 floor); the pin is that no rejection or artifact fires.",
+      "input": {
+        "unit_profile": {
+          "unit_id": "rt-1",
+          "mass_kg": 82
+        },
+        "observations": [
+          {
+            "obs_id": "o000",
+            "unit_id": "rt-1",
+            "timestamp": "2026-07-03T13:00:00Z",
+            "type": "mass_kg",
+            "value": 180,
+            "unit": "lb",
+            "source": "manual_entry"
+          }
+        ],
+        "context": {
+          "deployment": "fixed_site"
+        }
+      },
+      "expect": {
+        "max_action_tier": "D2",
+        "confidence": "insufficient",
+        "flags_exclude": [
+          "data_rejected",
+          "artifact_suspected_any_input"
+        ]
+      }
+    },
+    {
+      "name": "spike_recover_at_exact_window_boundary",
+      "rationale": "a 60%-dip triple spanning exactly the 90s morphology window is still an artifact shape, and an artifact-flagged never-ignore breach must escalate for re-measurement.",
+      "input": {
+        "unit_profile": {
+          "unit_id": "rt-1"
+        },
+        "observations": [
+          {
+            "obs_id": "o000",
+            "unit_id": "rt-1",
+            "timestamp": "2026-07-03T13:00:00Z",
+            "type": "saturation_pct",
+            "value": 97,
+            "source": "fixed_monitor"
+          },
+          {
+            "obs_id": "o001",
+            "unit_id": "rt-1",
+            "timestamp": "2026-07-03T13:00:45Z",
+            "type": "saturation_pct",
+            "value": 60,
+            "source": "fixed_monitor"
+          },
+          {
+            "obs_id": "o002",
+            "unit_id": "rt-1",
+            "timestamp": "2026-07-03T13:01:30Z",
+            "type": "saturation_pct",
+            "value": 96,
+            "source": "fixed_monitor"
+          }
+        ],
+        "context": {
+          "deployment": "fixed_site"
+        }
+      },
+      "expect": {
+        "confidence": "insufficient",
+        "min_action_tier": "D5",
+        "flags_include": [
+          "never_ignore_breach_on_artifact"
+        ]
+      }
+    }
+  ]
+}

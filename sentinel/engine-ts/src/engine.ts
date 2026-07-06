@@ -346,10 +346,18 @@ export class Engine {
     return this.evaluate(caseHandle.unit_profile, caseHandle.observations, caseHandle.context);
   }
 
-  recordOutcome(caseId: string, humanActionTier: string, outcomeNote = ""): AuditRecord {
+  /** outcomeLabel (ground truth for §7.2 back-testing):
+   * 'deterioration_confirmed' | 'no_deterioration' | 'indeterminate' | null. */
+  recordOutcome(
+    caseId: string,
+    humanActionTier: string,
+    outcomeNote = "",
+    outcomeLabel: string | null = null,
+  ): AuditRecord {
     return this.audit.append("outcome", caseId, ENGINE_VERSION, this.content.content_version, {
       human_action_tier: humanActionTier,
       outcome_note: outcomeNote,
+      outcome_label: outcomeLabel,
     });
   }
 

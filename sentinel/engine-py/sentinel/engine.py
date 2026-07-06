@@ -120,11 +120,14 @@ class Engine:
         case["observations"] = case["observations"] + [new_observation]
         return self.evaluate(case["unit_profile"], case["observations"], case["context"])
 
-    def record_outcome(self, case_id, human_action_tier, outcome_note=""):
+    def record_outcome(self, case_id, human_action_tier, outcome_note="", outcome_label=None):
+        """outcome_label (ground truth for §7.2 back-testing):
+        'deterioration_confirmed' | 'no_deterioration' | 'indeterminate' | None."""
         return self.audit.append("outcome", case_id, ENGINE_VERSION,
                                  self.content["content_version"],
                                  {"human_action_tier": human_action_tier,
-                                  "outcome_note": outcome_note})
+                                  "outcome_note": outcome_note,
+                                  "outcome_label": outcome_label})
 
     def replay(self, records):
         """Re-run every logged case; outputs must be byte-identical (§4)."""

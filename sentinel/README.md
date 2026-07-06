@@ -31,10 +31,13 @@ content/packages/…       demo content package (hash-verified manifest)
 content/tests/malformed/ the 20 G0 malformed-content fixtures
 engine-py/               Python 3.11 reference runtime (stdlib only)
 engine-ts/               TypeScript runtime (zero runtime deps, RN-portable core)
-golden/cases/            20 golden scenarios + counterfactuals; expected outputs
+golden/cases/            23 golden scenarios + counterfactuals; expected outputs
                          are the byte-exact cross-runtime contract
+analysis/                §7 surveillance jobs: override telemetry, outcome
+                         back-testing, content-change diff, red-team suite
 tools/                   content validator/signer, golden generator, workbook
-                         converter, coverage reporter, parity gate
+                         converter, coverage reporter, parity gate, fuzzer,
+                         watchdog CLI, local SQLite pipeline demo
 ```
 
 ## Architecture (spec §1)
