@@ -88,30 +88,6 @@ export default function HorizonBackdrop() {
             '0 -1px 0 0 rgba(219,240,255,0.6), 0 -6px 22px rgba(125,211,252,0.32), 0 -36px 110px rgba(56,189,248,0.18), 0 -90px 220px rgba(56,189,248,0.09)',
         }}
       />
-
-      {/* Warm light catching the edge near the sunrise, and a thin flare along the horizon */}
-      <div
-        className="absolute backdrop-breathe"
-        style={{
-          left: SUN_X,
-          top: SUN_Y,
-          width: '60vw',
-          height: '3.2vh',
-          transform: 'translate(-50%, -50%)',
-          background: 'radial-gradient(ellipse at center, rgba(255,226,186,0.55) 0%, rgba(255,200,140,0.18) 45%, transparent 70%)',
-        }}
-      />
-      <div
-        className="absolute backdrop-breathe"
-        style={{
-          left: SUN_X,
-          top: SUN_Y,
-          width: '86vw',
-          height: '2px',
-          transform: 'translate(-50%, -50%)',
-          background: 'linear-gradient(90deg, transparent, rgba(255,241,222,0.7) 50%, transparent)',
-        }}
-      />
     </div>
   );
 }
