@@ -366,3 +366,29 @@ html:has(#data),
 body:has(#data) {
   background-color: #0b0f14;
 }
+
+/* Home page backdrop: the sunrise breathes slowly and a few stars twinkle; both rest under reduced motion */
+.backdrop-breathe {
+  animation: backdropBreathe 12s ease-in-out infinite;
+}
+
+@keyframes backdropBreathe {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
+}
+
+.backdrop-twinkle {
+  animation: backdropTwinkle 7s ease-in-out infinite;
+}
+
+@keyframes backdropTwinkle {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 0.85; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .backdrop-breathe,
+  .backdrop-twinkle {
+    animation: none;
+  }
+}

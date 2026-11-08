@@ -26,7 +26,7 @@ export default function Footer({
       case 'founder-letter':
         return '';
       case 'home':
-        return 'bg-[#0B0F14] border-t border-white/10';
+        return 'border-t border-white/10';
       default:
         return 'bg-gradient-to-b from-blue-600 via-blue-500 to-blue-400';
     }

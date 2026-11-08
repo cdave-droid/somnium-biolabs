@@ -2,7 +2,9 @@
 
 import { useEffect, useState, useRef } from 'react';
 import Footer from './components/Footer';
+import ApproachStory from './components/ApproachStory';
 import DataHorizon from './components/DataHorizon';
+import HorizonBackdrop from './components/HorizonBackdrop';
 import { LiquidButton } from './components/ui/liquid-glass-button';
 
 export default function Home() {
@@ -131,7 +133,7 @@ export default function Home() {
   }, [videoDuration]);
 
   return (
-    <div className="min-h-screen bg-[#0B0F14] text-white overflow-x-hidden" style={{ scrollBehavior: 'smooth' }}>
+    <div className="min-h-screen bg-[#0B0F14] text-white overflow-x-clip" style={{ scrollBehavior: 'smooth' }}>
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         {/* Background Video */}
@@ -203,29 +205,43 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Where the data runs out */}
-      <DataHorizon />
-
-      {/* Contact Section */}
-      <section id="contact" className="bg-[#0B0F14] text-white text-center">
-        <div className="max-w-3xl mx-auto px-6 pt-20 pb-28 sm:pt-24 sm:pb-32">
-          <h2 className="text-balance text-3xl sm:text-5xl font-bold tracking-tight leading-[1.1]">
-            Working on human spaceflight or crew health?
-          </h2>
-          <p className="mt-6 text-lg sm:text-2xl text-white/90 leading-relaxed">
-            Let’s talk. Researchers, mission planners, partners and future teammates are all welcome.
-          </p>
-          <a
-            href="mailto:contact@somniumbio.com"
-            className="mt-10 inline-flex items-center px-7 py-3.5 rounded-full bg-white text-gray-900 font-semibold hover:bg-gray-200 active:scale-[0.98] transition"
-          >
-            contact@somniumbio.com
-          </a>
+      {/* Everything after the hero shares one backdrop that stays on screen while the sections scroll over it */}
+      <div className="relative">
+        <div className="pointer-events-none absolute inset-0">
+          <div className="sticky top-0 h-screen">
+            <HorizonBackdrop />
+          </div>
         </div>
-      </section>
 
-      {/* Footer */}
-      <Footer variant="home" />
+        <div className="relative">
+          {/* Where the data runs out */}
+          <DataHorizon />
+
+          {/* A model of one */}
+          <ApproachStory />
+
+          {/* Contact Section */}
+          <section id="contact" className="text-white text-center">
+            <div className="max-w-3xl mx-auto px-6 pt-20 pb-28 sm:pt-24 sm:pb-32">
+              <h2 className="text-balance text-3xl sm:text-5xl font-bold tracking-tight leading-[1.1]">
+                Working on human spaceflight or crew health?
+              </h2>
+              <p className="mt-6 text-lg sm:text-2xl text-white/90 leading-relaxed">
+                Let’s talk. Researchers, mission planners, partners and future teammates are all welcome.
+              </p>
+              <a
+                href="mailto:contact@somniumbio.com"
+                className="mt-10 inline-flex items-center px-7 py-3.5 rounded-full bg-white text-gray-900 font-semibold hover:bg-gray-200 active:scale-[0.98] transition"
+              >
+                contact@somniumbio.com
+              </a>
+            </div>
+          </section>
+
+          {/* Footer */}
+          <Footer variant="home" />
+        </div>
+      </div>
     </div>
   );
 }

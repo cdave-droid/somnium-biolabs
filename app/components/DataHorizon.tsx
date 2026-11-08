@@ -48,7 +48,7 @@ const isLast = (i: number) => i === ZONES.length - 1;
 
 export default function DataHorizon() {
   return (
-    <section id="data" className="bg-[#0B0F14] text-white">
+    <section id="data" className="text-white">
       <div className="max-w-7xl mx-auto px-6 lg:px-10 pt-24 pb-20 lg:pt-30 lg:pb-24">
         <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.05] text-balance">
           Where the data runs out
