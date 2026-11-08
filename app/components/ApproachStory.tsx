@@ -75,7 +75,7 @@ function ModelChart({ step }: { step: number }) {
         style={draw(step >= 2)}
       />
       <text x="232" y="282" textAnchor="middle" className="fill-sky-300 text-[13px]" style={{ opacity: step >= 2 ? 1 : 0, transition: 'opacity 500ms ease 500ms' }}>
-        Their model
+        Personalized model
       </text>
 
       {/* one person's readings */}
