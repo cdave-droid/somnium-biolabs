@@ -62,42 +62,6 @@ const MONITORS = [
   { name: 'Heart B', perBeat: '50 mL', output: '6.0 L/min', bar: '71%', pulse: '1.08' },
 ];
 
-const PRINCIPLES = [
-  {
-    title: 'Personal',
-    text: 'One twin for each crewmember, learning how their own heart adapts and recovers across a mission.',
-    icon: ['M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'],
-  },
-  {
-    title: 'Predictive',
-    text: 'Forecasts cardiovascular reserve for the next task and the trip home, before a limit is reached.',
-    icon: ['M13 7h8m0 0v8m0-8l-8 8-4-4-6 6'],
-  },
-  {
-    title: 'Compares plans',
-    text: 'Weighs pace, rest and when to turn back, so the crew can choose with foresight.',
-    icon: ['M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4'],
-  },
-  {
-    title: 'On board',
-    text: 'Runs on mission hardware, with no Earth link required.',
-    icon: ['M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z'],
-  },
-  {
-    title: 'Honest',
-    text: 'Shows how confident it is, and says so when it can’t advise.',
-    icon: [
-      'M15 12a3 3 0 11-6 0 3 3 0 016 0z',
-      'M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z',
-    ],
-  },
-  {
-    title: 'Crew in command',
-    text: 'The crew makes every decision. The twin adds foresight to existing safety rules.',
-    icon: ['M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z'],
-  },
-];
-
 // Planet surfaces are drawn with CSS gradients, so no extra images are needed.
 const STOPS: {
   name: string;
@@ -431,41 +395,17 @@ export default function Home() {
             ))}
           </div>
 
-          <p className="mt-10 text-xs text-gray-500 text-center max-w-4xl mx-auto leading-relaxed">
-            Sources:{' '}
-            {SOURCES.map((source, index) => (
-              <span key={source.href}>
-                <a
-                  href={source.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline decoration-gray-300 underline-offset-2 hover:text-gray-700"
-                >
-                  {source.label}
-                </a>
-                {index < SOURCES.length - 1 ? '; ' : '.'}
-              </span>
-            ))}
-          </p>
-        </div>
-      </section>
-
-      {/* Section Divider */}
-      <div className="border-t border-gray-400"></div>
-
-      {/* Heart Rate Explainer Section */}
-      <section id="heartbeat" className="relative py-20 lg:py-28" style={{ backgroundColor: '#F8F2EB' }}>
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-balance text-3xl sm:text-5xl font-bold text-gray-900 mb-6 scroll-fade-in">
+          {/* Heart-rate demo: the same heartbeat can hide a very different heart */}
+          <div className="text-center mt-16 sm:mt-24 mb-10 sm:mb-12">
+            <h3 className="text-balance text-2xl sm:text-4xl font-bold text-gray-900 mb-4 scroll-fade-in">
               The same heartbeat can hide a very different heart
-            </h2>
+            </h3>
             <p className="text-lg sm:text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed scroll-fade-in">
               Heart-rate monitors count beats. They can’t see how much blood each beat moves.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-10 max-w-5xl mx-auto">
             {MONITORS.map((monitor, index) => (
               <div
                 key={monitor.name}
@@ -513,72 +453,36 @@ export default function Home() {
             ))}
           </div>
 
-          <div className="text-center mt-12 max-w-3xl mx-auto">
-            <p className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 text-balance scroll-fade-in">
+          <div className="text-center mt-10 sm:mt-12 max-w-3xl mx-auto">
+            <p className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 text-balance scroll-fade-in">
               29% less blood, and the heart rate reads the same.
             </p>
-            <p className="text-base sm:text-lg text-gray-700 leading-relaxed scroll-fade-in">
-              When capacity falls, the same work gets harder too. After a 17% drop in capacity, a task that took half of a crewmember’s capacity takes 60%.
-            </p>
-            <p className="mt-6 text-xs text-gray-500">
+            <p className="text-xs text-gray-500">
               Illustrative numbers. Blood pumped per minute = heart rate × volume per beat.
             </p>
           </div>
-        </div>
-      </section>
 
-      {/* A Twin That Looks Ahead Section */}
-      <section id="approach" className="relative py-20 lg:py-32 overflow-hidden">
-        {/* Background Video */}
-        <video
-          className="absolute inset-0 w-full h-full object-cover"
-          autoPlay
-          muted
-          loop
-          playsInline
-          poster="/phy-poster.jpg"
-          aria-hidden="true"
-        >
-          <source src="/phy.mp4" type="video/mp4" />
-        </video>
-        {/* Dark Overlay */}
-        <div className="absolute inset-0 bg-black/60"></div>
-        {/* Blur Overlay */}
-        <div className="absolute inset-0 backdrop-blur-[2px] bg-white/5"></div>
-
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-balance text-3xl sm:text-5xl font-bold text-white mb-6 scroll-fade-in">
-              A twin that looks ahead
-            </h2>
-            <p className="text-lg sm:text-xl text-white/85 max-w-3xl mx-auto leading-relaxed scroll-fade-in">
-              Today’s monitors describe the present and react to limits. Our twin forecasts what comes next.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6">
-            {PRINCIPLES.map((principle, index) => (
-              <div
-                key={principle.title}
-                className="scroll-fade-in"
-                style={{ transitionDelay: `${(index % 3) * 120}ms` }}
-              >
-                <div className="h-full rounded-xl bg-white/[0.08] border border-white/15 p-6 hover:bg-white/[0.14] transition-colors duration-300">
-                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mb-4">
-                    <svg className="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                      {principle.icon.map((d) => (
-                        <path key={d} strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={d} />
-                      ))}
-                    </svg>
-                  </div>
-                  <h3 className="text-lg font-semibold text-white mb-2">{principle.title}</h3>
-                  <p className="text-white/80 text-sm sm:text-base leading-relaxed">{principle.text}</p>
-                </div>
-              </div>
+          <p className="mt-10 text-xs text-gray-500 text-center max-w-4xl mx-auto leading-relaxed">
+            Sources:{' '}
+            {SOURCES.map((source, index) => (
+              <span key={source.href}>
+                <a
+                  href={source.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline decoration-gray-300 underline-offset-2 hover:text-gray-700"
+                >
+                  {source.label}
+                </a>
+                {index < SOURCES.length - 1 ? '; ' : '.'}
+              </span>
             ))}
-          </div>
+          </p>
         </div>
       </section>
+
+      {/* Section Divider */}
+      <div className="border-t border-gray-400"></div>
 
       {/* Moon to Mars Section */}
       <section id="horizon" className="relative py-20 lg:py-28" style={{ backgroundColor: '#F8F2EB' }}>
