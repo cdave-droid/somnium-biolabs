@@ -1,140 +1,9 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import Link from 'next/link';
 import Footer from './components/Footer';
+import DataHorizon from './components/DataHorizon';
 import { LiquidButton } from './components/ui/liquid-glass-button';
-
-// Published facts behind the "Into the unknown" cards (sources listed below the cards).
-const FACTS = [
-  {
-    value: '1–3',
-    unit: 'days',
-    label: 'Apollo surface stays',
-    text: 'All human experience of lunar gravity comes from these short stays. A lunar base plans month-long stays, with spacewalks several times a week.',
-    hoverBg: 'tech-bg-blue',
-  },
-  {
-    value: '17',
-    unit: '%',
-    label: 'Less aerobic capacity',
-    text: 'Early in space station missions, astronauts’ peak aerobic capacity fell about 17%, while their peak heart rate didn’t change.',
-    hoverBg: 'tech-bg-purple',
-  },
-  {
-    value: '10–20',
-    unit: 'years',
-    label: 'Of arterial aging',
-    text: 'Six months in orbit stiffened astronauts’ arteries as much as 10 to 20 years of aging would on Earth.',
-    hoverBg: 'tech-bg-green',
-  },
-  {
-    value: '100+',
-    unit: '',
-    label: 'Spacewalks a year',
-    text: 'A working lunar base could need more than a hundred spacewalks a year, more than any ground team can watch over an intermittent link to Earth.',
-    hoverBg: 'tech-bg-orange',
-  },
-];
-
-const SOURCES = [
-  {
-    label: 'NASA, Artemis Base Camp concept (2020)',
-    href: 'https://www.nasa.gov/blogs/missions/2020/10/28/lunar-living-nasas-artemis-base-camp-concept/',
-  },
-  {
-    label: 'Richter et al., Frontiers in Physiology (2017)',
-    href: 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5559498/',
-  },
-  {
-    label: 'Moore et al., Journal of Applied Physiology (2014)',
-    href: 'https://pubmed.ncbi.nlm.nih.gov/24970852/',
-  },
-  {
-    label: 'Hughson et al., American Journal of Physiology (2016)',
-    href: 'https://doi.org/10.1152/ajpheart.00802.2015',
-  },
-];
-
-// Illustrative example: blood pumped per minute = heart rate × volume per beat.
-const MONITORS = [
-  { name: 'Heart A', perBeat: '70 mL', output: '8.4 L/min', bar: '100%', pulse: '1.18' },
-  { name: 'Heart B', perBeat: '50 mL', output: '6.0 L/min', bar: '71%', pulse: '1.08' },
-];
-
-// Planet surfaces are drawn with CSS gradients, so no extra images are needed.
-const STOPS: {
-  name: string;
-  tag: string;
-  text: string;
-  surface: string;
-  link?: { href: string; label: string };
-}[] = [
-  {
-    name: 'The Moon',
-    tag: 'The proving ground',
-    text: 'Month-long stays, frequent spacewalks, and only intermittent contact with Earth.',
-    surface:
-      'radial-gradient(circle at 62% 58%, rgba(0,0,0,0.16) 0 9%, transparent 10%), radial-gradient(circle at 38% 70%, rgba(0,0,0,0.12) 0 6%, transparent 7%), radial-gradient(circle at 54% 30%, rgba(0,0,0,0.1) 0 5%, transparent 6%), radial-gradient(circle at 32% 28%, #fafaf9 0%, #d6d3cd 38%, #9c978f 72%, #5d5a55 100%)',
-  },
-  {
-    name: 'Mars',
-    tag: 'The destination',
-    text: 'Messages take 4 to 22 minutes each way, so crews must make decisions on their own.',
-    surface:
-      'radial-gradient(ellipse 34% 14% at 55% 62%, rgba(90,25,8,0.35) 0 60%, transparent 64%), radial-gradient(ellipse 22% 10% at 40% 38%, rgba(90,25,8,0.25) 0 60%, transparent 64%), radial-gradient(circle at 32% 28%, #f7c3a1 0%, #e07a4a 35%, #b14a24 70%, #5f200c 100%)',
-  },
-  {
-    name: 'Earth',
-    tag: 'Back home',
-    text: 'The same idea — a twin that looks ahead — guides our work in critical care.',
-    surface:
-      'radial-gradient(ellipse 28% 20% at 60% 42%, rgba(80,160,95,0.9) 0 60%, transparent 63%), radial-gradient(ellipse 16% 24% at 36% 64%, rgba(80,160,95,0.85) 0 60%, transparent 63%), radial-gradient(ellipse 36% 9% at 50% 22%, rgba(255,255,255,0.45) 0 55%, transparent 60%), radial-gradient(circle at 32% 28%, #cfeaff 0%, #5aa0e6 32%, #1f62b0 68%, #0c2a55 100%)',
-    link: { href: '/technology', label: 'Explore the Technology' },
-  },
-];
-
-// Builds a heartbeat (ECG) trace: one beat every 300 units, baseline at y = 60.
-const ECG_BEAT_WIDTH = 300;
-
-function ecgPath(beats: number) {
-  let d = 'M0,60';
-  for (let i = 0; i < beats; i++) {
-    const x = i * ECG_BEAT_WIDTH;
-    d += ` L${x + 100},60 Q${x + 115},50 ${x + 130},60 L${x + 150},60 L${x + 158},68 L${x + 168},12 L${x + 178},84 L${x + 186},60 L${x + 215},60 Q${x + 237},44 ${x + 259},60 L${x + 300},60`;
-  }
-  return d;
-}
-
-function HeartbeatLine({
-  beats = 4,
-  tone = 'red',
-  className = '',
-}: {
-  beats?: number;
-  tone?: 'red' | 'green';
-  className?: string;
-}) {
-  const d = ecgPath(beats);
-  return (
-    <div className={`w-full ${className}`} aria-hidden="true">
-      <svg
-        viewBox={`0 0 ${beats * ECG_BEAT_WIDTH} 100`}
-        preserveAspectRatio="none"
-        className="w-full h-full overflow-visible"
-      >
-        <path d={d} fill="none" className={tone === 'green' ? 'ecg-base ecg-base-green' : 'ecg-base'} vectorEffect="non-scaling-stroke" />
-        <path
-          d={d}
-          fill="none"
-          pathLength={1000}
-          className={tone === 'green' ? 'ecg-sweep ecg-sweep-green' : 'ecg-sweep'}
-          vectorEffect="non-scaling-stroke"
-        />
-      </svg>
-    </div>
-  );
-}
 
 export default function Home() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -262,7 +131,7 @@ export default function Home() {
   }, [videoDuration]);
 
   return (
-    <div className="min-h-screen bg-white text-black overflow-x-hidden" style={{ scrollBehavior: 'smooth' }}>
+    <div className="min-h-screen bg-[#0B0F14] text-white overflow-x-hidden" style={{ scrollBehavior: 'smooth' }}>
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         {/* Background Video */}
@@ -334,231 +203,21 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Mission Statement */}
-      <section
-        id="mission"
-        className="relative pt-20 lg:pt-32 pb-12 lg:pb-16 overflow-hidden"
-        style={{ backgroundColor: '#F8F2EB' }}
-      >
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-xs sm:text-sm font-semibold uppercase tracking-[0.25em] text-[#9E2306] mb-6 scroll-fade-in">
-            Continuous Cardiovascular Twin
-          </p>
-          <h2 className="text-balance text-3xl sm:text-5xl font-bold text-gray-900 leading-tight mb-8 scroll-fade-in">
-            A lunar base will ask more of the human heart than any mission flown.
-          </h2>
-          <p className="text-lg sm:text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed scroll-fade-in">
-            We’re building a personal cardiovascular twin for every crewmember. It looks ahead, runs on board, and keeps the crew in command when Earth is out of reach.
-          </p>
-        </div>
-        <HeartbeatLine className="mt-12 sm:mt-16 h-16 sm:h-24" />
-      </section>
-
-      {/* Section Divider */}
-      <div className="border-t border-gray-400"></div>
-
-      {/* What We Know Section */}
-      <section id="unknown" className="relative py-20 lg:py-28" style={{ backgroundColor: '#F8F2EB' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-balance text-3xl sm:text-5xl font-bold text-gray-900 mb-6 scroll-fade-in">
-              Into the unknown
-            </h2>
-            <p className="text-lg sm:text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed scroll-fade-in">
-              No one has measured how the heart adapts, recovers or wears down across weeks of repeated spacewalks in lunar gravity. Here is what we do know.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
-            {FACTS.map((fact, index) => (
-              <div
-                key={fact.label}
-                className="scroll-fade-in"
-                style={{ transitionDelay: `${index * 120}ms` }}
-              >
-                <div className="h-full bg-white/50 backdrop-blur-sm rounded-xl p-6 group relative overflow-hidden hover:scale-105 transition-transform duration-300">
-                  <div className={`absolute inset-0 ${fact.hoverBg} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}></div>
-                  <div className="relative z-10">
-                    <p className="font-bold text-gray-900 mb-2 leading-none">
-                      <span className="text-4xl xl:text-5xl">{fact.value}</span>
-                      {fact.unit && (
-                        <span className={`text-xl xl:text-2xl font-semibold text-gray-600 ${fact.unit === '%' ? '' : 'ml-1.5'}`}>{fact.unit}</span>
-                      )}
-                    </p>
-                    <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#9E2306] mt-3 mb-4">
-                      {fact.label}
-                    </p>
-                    <p className="text-gray-700 text-sm sm:text-base leading-relaxed">{fact.text}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Heart-rate demo: the same heartbeat can hide a very different heart */}
-          <div className="text-center mt-16 sm:mt-24 mb-10 sm:mb-12">
-            <h3 className="text-balance text-2xl sm:text-4xl font-bold text-gray-900 mb-4 scroll-fade-in">
-              The same heartbeat can hide a very different heart
-            </h3>
-            <p className="text-lg sm:text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed scroll-fade-in">
-              Heart-rate monitors count beats. They can’t see how much blood each beat moves.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-10 max-w-5xl mx-auto">
-            {MONITORS.map((monitor, index) => (
-              <div
-                key={monitor.name}
-                className="scroll-fade-in"
-                style={{ transitionDelay: `${index * 150}ms` }}
-              >
-                <div className="rounded-2xl bg-[#0B1117] border border-white/10 shadow-2xl p-6 sm:p-8 text-white">
-                  <div className="flex items-center justify-between mb-6">
-                    <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/60">{monitor.name}</p>
-                    <svg
-                      className="heart-pulse w-8 h-8 text-[#E5484D]"
-                      style={{ '--pulse-scale': monitor.pulse } as React.CSSProperties}
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                    </svg>
-                  </div>
-
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-300/80 mb-1">Heart rate</p>
-                  <p className="text-5xl sm:text-6xl font-bold text-emerald-400 tabular-nums mb-4">
-                    120 <span className="text-lg sm:text-xl font-medium text-emerald-300/80">beats/min</span>
-                  </p>
-                  <HeartbeatLine tone="green" className="h-12 mb-6" />
-
-                  <div className="grid grid-cols-2 gap-4 mb-5">
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.15em] text-white/50 mb-1">Per beat</p>
-                      <p className="text-2xl sm:text-3xl font-semibold tabular-nums">{monitor.perBeat}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.15em] text-white/50 mb-1">Blood pumped</p>
-                      <p className="text-2xl sm:text-3xl font-semibold tabular-nums">{monitor.output}</p>
-                    </div>
-                  </div>
-                  <div className="h-3 rounded-full bg-white/10 overflow-hidden">
-                    <div
-                      className="output-bar h-full rounded-full bg-gradient-to-r from-[#E5484D] to-[#F59E0B]"
-                      style={{ '--bar': monitor.bar } as React.CSSProperties}
-                    ></div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center mt-10 sm:mt-12 max-w-3xl mx-auto">
-            <p className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 text-balance scroll-fade-in">
-              29% less blood, and the heart rate reads the same.
-            </p>
-            <p className="text-xs text-gray-500">
-              Illustrative numbers. Blood pumped per minute = heart rate × volume per beat.
-            </p>
-          </div>
-
-          <p className="mt-10 text-xs text-gray-500 text-center max-w-4xl mx-auto leading-relaxed">
-            Sources:{' '}
-            {SOURCES.map((source, index) => (
-              <span key={source.href}>
-                <a
-                  href={source.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline decoration-gray-300 underline-offset-2 hover:text-gray-700"
-                >
-                  {source.label}
-                </a>
-                {index < SOURCES.length - 1 ? '; ' : '.'}
-              </span>
-            ))}
-          </p>
-        </div>
-      </section>
-
-      {/* Section Divider */}
-      <div className="border-t border-gray-400"></div>
-
-      {/* Moon to Mars Section */}
-      <section id="horizon" className="relative py-20 lg:py-28" style={{ backgroundColor: '#F8F2EB' }}>
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-14 sm:mb-20">
-            <h2 className="text-balance text-3xl sm:text-5xl font-bold text-gray-900 mb-6 scroll-fade-in">
-              Proven on the Moon, built for Mars
-            </h2>
-            <p className="text-lg sm:text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed scroll-fade-in">
-              The farther crews travel, the less Earth can help in the moment. We’re building for that future, and bringing what we learn back home.
-            </p>
-          </div>
-
-          <div className="relative">
-            {/* Dashed path between the planets (desktop) */}
-            <div
-              aria-hidden="true"
-              className="hidden md:block absolute top-14 left-[16.67%] right-[16.67%] border-t-2 border-dashed border-gray-400/70"
-            ></div>
-            <ol className="relative grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8">
-              {STOPS.map((stop, index) => (
-                <li
-                  key={stop.name}
-                  className="relative scroll-fade-in"
-                  style={{ transitionDelay: `${index * 150}ms` }}
-                >
-                  {/* Dashed path between the planets (mobile) */}
-                  {index < STOPS.length - 1 && (
-                    <div
-                      aria-hidden="true"
-                      className="md:hidden absolute left-10 top-20 -bottom-10 border-l-2 border-dashed border-gray-400/70"
-                    ></div>
-                  )}
-                  <div className="flex md:flex-col items-start md:items-center gap-5 md:gap-0 md:text-center">
-                    <div
-                      aria-hidden="true"
-                      className="planet relative z-10 w-20 h-20 md:w-28 md:h-28 shrink-0 rounded-full md:mb-6"
-                      style={{ background: stop.surface }}
-                    ></div>
-                    <div className="pt-1 md:pt-0">
-                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#9E2306] mb-1">{stop.tag}</p>
-                      <h3 className="text-2xl font-bold text-gray-900 mb-2">{stop.name}</h3>
-                      <p className="text-gray-700 leading-relaxed md:max-w-xs md:mx-auto">{stop.text}</p>
-                      {stop.link && (
-                        <Link
-                          href={stop.link.href}
-                          className="inline-flex items-center gap-2 mt-5 px-5 py-2.5 rounded-full bg-gray-900 text-white text-sm font-medium hover:bg-gray-700 transition-colors"
-                        >
-                          {stop.link.label}
-                          <span aria-hidden="true">→</span>
-                        </Link>
-                      )}
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </div>
-      </section>
-
-      {/* Section Divider */}
-      <div className="border-t border-gray-400"></div>
+      {/* Where the data runs out */}
+      <DataHorizon />
 
       {/* Contact Section */}
-      <section id="contact" className="py-16 sm:py-24 text-center" style={{ backgroundColor: '#F8F2EB' }}>
-        <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <h2 className="text-balance text-2xl sm:text-4xl font-bold text-gray-900 mb-4 scroll-fade-in">
+      <section id="contact" className="bg-[#0B0F14] text-white text-center">
+        <div className="max-w-3xl mx-auto px-6 pt-20 pb-28 sm:pt-24 sm:pb-32">
+          <h2 className="text-balance text-3xl sm:text-5xl font-bold tracking-tight leading-[1.1]">
             Working on human spaceflight or crew health?
           </h2>
-          <p className="text-base sm:text-lg text-gray-700 leading-relaxed mb-8 scroll-fade-in">
+          <p className="mt-6 text-lg sm:text-2xl text-white/90 leading-relaxed">
             Let’s talk. Researchers, mission planners, partners and future teammates are all welcome.
           </p>
           <a
             href="mailto:contact@somniumbio.com"
-            className="inline-flex items-center px-6 py-3 rounded-full bg-gray-900 text-white font-medium hover:bg-gray-700 transition-colors"
+            className="mt-10 inline-flex items-center px-7 py-3.5 rounded-full bg-white text-gray-900 font-semibold hover:bg-gray-200 active:scale-[0.98] transition"
           >
             contact@somniumbio.com
           </a>
