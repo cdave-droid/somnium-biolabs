@@ -108,8 +108,8 @@ export default function Footer({
           </div>
           
           {/* Right - Copyright */}
-          <div className="text-xs sm:text-sm text-white/80 text-center sm:text-right">
-            © 2025 Somnium Biolabs. All rights reserved.
+          <div className="text-xs sm:text-sm text-white/80 text-center sm:text-right" suppressHydrationWarning>
+            © {new Date().getFullYear()} Somnium Biolabs. All rights reserved.
           </div>
         </div>
       </div>

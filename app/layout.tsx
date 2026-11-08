@@ -11,7 +11,7 @@ const exo2 = Exo_2({
 
 export const metadata: Metadata = {
   title: "Somnium Biolabs",
-  description: "Innovative technology solutions for the future",
+  description: "Somnium Biolabs builds personal physiological twins that look ahead: for crews on the Moon and Mars, and for patients in critical care.",
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' }
