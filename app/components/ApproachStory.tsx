@@ -8,8 +8,8 @@ import { useEffect, useRef, useState } from 'react';
 const STEPS = [
   { title: 'What medicine knows', text: 'Computational models of how the heart, vessels and lungs work together.' },
   { title: 'What one person shows', text: 'A handful of that person’s own signals, from a monitor or a wearable.' },
-  { title: 'A model of one', text: 'AI fits the physiology to them, not to the average patient.' },
-  { title: 'What comes next', text: 'Their model looks ahead, and shows how sure it is.' },
+  { title: 'Precision physiology', text: 'AI fits the physiology to the individual.' },
+  { title: 'State prediction', text: 'Personalized model enables continuous prediction of physiological states.' },
 ];
 
 const POINTS: [number, number][] = [
@@ -122,13 +122,13 @@ export default function ApproachStory() {
   return (
     <section id="approach" ref={ref} className="text-white md:h-[200vh]">
       <div className="md:sticky md:top-0 md:h-screen">
-        <div className="max-w-7xl mx-auto px-6 lg:px-10 pt-24 pb-20 md:pt-28 md:pb-0 grid md:grid-cols-12 gap-x-12 gap-y-12">
+        <div className="max-w-7xl mx-auto px-6 lg:px-10 pt-24 pb-20 md:pt-28 md:pb-0 short:pt-20 grid md:grid-cols-12 gap-x-12 gap-y-12">
           <div className="md:col-span-5">
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.05]">A model of one</h2>
-            <p className="mt-6 text-lg lg:text-xl text-white/90 leading-relaxed">
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl short:text-5xl font-bold tracking-tight leading-[1.05]">A model of one</h2>
+            <p className="mt-6 short:mt-4 text-lg lg:text-xl short:text-lg text-white/90 leading-relaxed">
               We combine computational models of human physiology with AI. The models carry what medicine knows about how bodies work. The AI fits them to one person, so care can be predictive and precise, even at the edge of medicine.
             </p>
-            <ol className="mt-10 space-y-5">
+            <ol className="mt-10 short:mt-6 space-y-5 short:space-y-3">
               {STEPS.map((s, i) => (
                 <li key={s.title} className={`transition-colors duration-500 ${i <= step ? 'text-white' : 'text-white/50'}`}>
                   <h3 className="text-lg font-bold tracking-tight">{s.title}</h3>

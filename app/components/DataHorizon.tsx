@@ -6,7 +6,7 @@
 type Zone = { name: string; line: string; dots: number; phoneDots: number; tone: string };
 
 const ZONES: Zone[] = [
-  { name: 'Hospital records', line: 'Where medical AI learns: millions of routine cases.', dots: 1100, phoneDots: 240, tone: 'text-gray-500' },
+  { name: 'Hospital records', line: 'Where medical AI excels.', dots: 1100, phoneDots: 240, tone: 'text-gray-500' },
   { name: 'The ICU', line: 'The sickest patients are the rarest cases.', dots: 260, phoneDots: 80, tone: 'text-gray-300' },
   { name: 'Remote Earth', line: 'No specialist nearby, almost no local data.', dots: 80, phoneDots: 30, tone: 'text-gray-200' },
   { name: 'The military', line: 'Field injuries rarely reach the record.', dots: 28, phoneDots: 16, tone: 'text-gray-100' },
@@ -54,7 +54,7 @@ export default function DataHorizon() {
           Where the data runs out
         </h2>
         <p className="mt-6 text-lg sm:text-2xl text-white/90 leading-relaxed max-w-3xl">
-          Medical AI learns from crowds: millions of patient records. At the edge of medicine there is no crowd, and the further care gets from the hospital, the less those models know.
+          Medical AI learns from crowds: millions of patient records. At the edge of medicine there is no crowd, and the further care gets from the hospital, the less traditional approaches work.
         </p>
 
         {/* Wide screens: one field across five columns */}
