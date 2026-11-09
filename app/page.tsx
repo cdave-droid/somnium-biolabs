@@ -224,10 +224,10 @@ export default function Home() {
           <section id="contact" className="text-white text-center">
             <div className="max-w-3xl mx-auto px-6 pt-20 pb-28 sm:pt-24 sm:pb-32">
               <h2 className="text-balance text-3xl sm:text-5xl font-bold tracking-tight leading-[1.1]">
-                Working on human spaceflight or crew health?
+                Working on or interested in human spaceflight or extreme medicine?
               </h2>
               <p className="mt-6 text-lg sm:text-2xl text-white/90 leading-relaxed">
-                Let’s talk. Researchers, mission planners, partners and future teammates are all welcome.
+                Let’s talk.
               </p>
               <a
                 href="mailto:contact@somniumbio.com"
