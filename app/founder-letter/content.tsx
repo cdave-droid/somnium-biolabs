@@ -1,11 +1,11 @@
-// Founder's Letter copy. The page layout reads everything from this file: the header, the opening
+// Founder Letter copy. The page layout reads everything from this file: the header, the opening
 // paragraphs, one entry per section in the page's left-hand menu, and the closing quote.
 import type { ReactNode } from 'react';
 
 export type LetterSection = { id: string; title: string; paragraphs: ReactNode[] };
 
 export const header = {
-  title: 'Founder’s Letter',
+  title: 'Founder Letter',
   labels: ['Company', 'Vision'],
   subtitle: 'Every patient is a physiological mystery to solve.',
 };

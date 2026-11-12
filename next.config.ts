@@ -9,6 +9,12 @@ const nextConfig: NextConfig = {
         destination: "/",
         permanent: false,
       },
+      // The White Paper page was taken down for now; send its link to the home page until it returns.
+      {
+        source: "/white-paper",
+        destination: "/",
+        permanent: false,
+      },
     ];
   },
 };

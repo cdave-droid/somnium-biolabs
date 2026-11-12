@@ -198,7 +198,7 @@ export default function Home() {
                   className="w-full sm:w-auto cursor-pointer"
                   onClick={() => window.location.href = '/founder-letter'}
                 >
-                  Read the Founder's Letter
+                  Read the Founder Letter
                 </LiquidButton>
             </div>
           </div>
