@@ -205,7 +205,11 @@ export default function FounderLetter() {
                     {sectionIndex === sections.length - 1 && (
                       <div className="bg-gray-50 border-l-4 border-gray-600 p-6 my-8">
                         <blockquote className="text-xl italic text-gray-800 mb-4">
-                          “{signOff.quote}”
+                          {signOff.quote.map((line, i) => (
+                            <span key={line} className="block">
+                              {i === 0 && '“'}{line}{i === signOff.quote.length - 1 && '”'}
+                            </span>
+                          ))}
                         </blockquote>
                         <div className="flex items-end justify-between gap-6">
                           <div>

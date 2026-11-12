@@ -56,7 +56,8 @@ export const sections: LetterSection[] = [
 ];
 
 export const signOff = {
-  quote: 'Beliefs color your world. So why not believe in the biggest dream you can possibly imagine?',
+  // Each entry starts on its own line.
+  quote: ['Beliefs color your world.', 'So why not believe in the biggest dream you can possibly imagine?'],
   name: 'Dr. Chintan Dave',
   role: 'Founder & CEO, Somnium Biolabs',
   photo: '/founder-chintan-dave.jpg',
