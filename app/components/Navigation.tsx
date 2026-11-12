@@ -8,12 +8,15 @@ import { useEffect, useState, useRef } from 'react';
 const Navigation = () => {
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
+  // The home page is dark all the way down, so its menu keeps the light-on-dark style there.
+  const lightNav = isScrolled && pathname !== '/';
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
 
   const navItems = [
     // { name: 'White Paper I', href: '/white-paper' },
     { name: 'Technology', href: '/technology' },
+    { name: 'Media', href: '/media' },
     { name: 'Founder Letter', href: '/founder-letter' },
   ];
 
@@ -69,10 +72,10 @@ const Navigation = () => {
                   href={item.href}
                   className={`text-sm font-medium transition-colors duration-200 ${
                     pathname === item.href
-                      ? isScrolled
+                      ? lightNav
                         ? 'text-gray-900 bg-gray-200 px-3 py-1 rounded-full'
                         : 'text-white bg-white/20 px-3 py-1 rounded-full'
-                      : isScrolled
+                      : lightNav
                         ? 'text-gray-700 hover:text-gray-900'
                         : 'text-white/70 hover:text-white'
                   }`}
@@ -85,7 +88,7 @@ const Navigation = () => {
             {/* Right side - CTA Button (Desktop) */}
             <div className="hidden md:flex items-center">
               <a href="/#contact" className={`px-4 xl:px-6 py-2 rounded-full text-sm font-medium transition-colors inline-block ${
-                isScrolled
+                lightNav
                   ? 'bg-gray-900 text-white hover:bg-black'
                   : 'bg-white text-black hover:bg-gray-100'
               }`}>
@@ -99,7 +102,7 @@ const Navigation = () => {
                 type="button"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className={`focus:outline-none transition-colors ${
-                  isScrolled
+                  lightNav
                     ? 'text-gray-700 hover:text-gray-900'
                     : 'text-white/70 hover:text-white'
                 }`}
@@ -123,10 +126,10 @@ const Navigation = () => {
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={`text-sm font-medium transition-colors duration-200 px-4 py-3 rounded-md border-l-4 whitespace-nowrap overflow-hidden text-ellipsis ${
                       pathname === item.href
-                        ? isScrolled
+                        ? lightNav
                           ? 'text-gray-900 bg-gray-200/80 backdrop-blur-sm border-gray-400'
                           : 'text-white bg-white/20 backdrop-blur-sm border-white/40'
-                        : isScrolled
+                        : lightNav
                           ? 'text-gray-700 hover:text-gray-900 border-transparent'
                           : 'text-white/70 hover:text-white border-transparent'
                     }`}
@@ -138,7 +141,7 @@ const Navigation = () => {
                   href="/#contact" 
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={`px-4 py-3 rounded-md text-sm font-medium transition-colors text-left block border-l-4 ${
-                    isScrolled
+                    lightNav
                       ? 'bg-gray-900 text-white hover:bg-black border-gray-600'
                       : 'bg-white text-black hover:bg-gray-100 border-gray-300'
                   }`}

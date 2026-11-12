@@ -5,6 +5,9 @@
   --foreground: #171717;
 }
 
+/* Wide but short screens (most laptops): used where content must fit one pinned screen */
+@custom-variant short (@media (min-width: 768px) and (max-height: 880px));
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -358,5 +361,37 @@ html {
 @keyframes rainbow-gradient {
   to {
     background-position: 200% center;
+  }
+}
+
+/* Home page: dark all the way down, including when a phone scrolls past the edge */
+html:has(#data),
+body:has(#data) {
+  background-color: #0b0f14;
+}
+
+/* Home page backdrop: the sunrise breathes slowly and a few stars twinkle; both rest under reduced motion */
+.backdrop-breathe {
+  animation: backdropBreathe 12s ease-in-out infinite;
+}
+
+@keyframes backdropBreathe {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
+}
+
+.backdrop-twinkle {
+  animation: backdropTwinkle 7s ease-in-out infinite;
+}
+
+@keyframes backdropTwinkle {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 0.85; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .backdrop-breathe,
+  .backdrop-twinkle {
+    animation: none;
   }
 }

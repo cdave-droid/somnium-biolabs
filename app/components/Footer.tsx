@@ -5,7 +5,7 @@ interface FooterProps {
   previousText?: string;
   nextHref?: string;
   nextText?: string;
-  variant?: 'white-paper' | 'problem-statement' | 'technology' | 'founder-letter' | 'default' | 'home';
+  variant?: 'white-paper' | 'problem-statement' | 'technology' | 'founder-letter' | 'media' | 'default' | 'home';
 }
 
 export default function Footer({ 
@@ -27,6 +27,8 @@ export default function Footer({
         return '';
       case 'home':
         return '';
+      case 'media':
+        return 'bg-[#040809]';
       default:
         return 'bg-gradient-to-b from-blue-600 via-blue-500 to-blue-400';
     }
@@ -58,19 +60,12 @@ export default function Footer({
           style={{ backgroundImage: 'url(/r1.jpg)' }}
         ></div>
       )}
-      {/* Background image for home variant */}
-      {variant === 'home' && (
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: 'url(/l2.jpeg)' }}
-        ></div>
-      )}
       {/* Dark overlay for readability */}
-      {(variant === 'technology' || variant === 'founder-letter' || variant === 'problem-statement' || variant === 'home') && (
+      {(variant === 'technology' || variant === 'founder-letter' || variant === 'problem-statement') && (
         <div className="absolute inset-0 bg-black/30"></div>
       )}
-      {/* Blur Overlay for technology, founder-letter, problem-statement, and home variants */}
-      {(variant === 'technology' || variant === 'founder-letter' || variant === 'problem-statement' || variant === 'home') && (
+      {/* Blur Overlay for technology, founder-letter and problem-statement variants */}
+      {(variant === 'technology' || variant === 'founder-letter' || variant === 'problem-statement') && (
         <div className="absolute inset-0 backdrop-blur-sm bg-white/10"></div>
       )}
       
@@ -81,12 +76,6 @@ export default function Footer({
         }}></div>
       )}
       
-      {/* Noise/Texture overlay for home variant */}
-      {variant === 'home' && (
-        <div className="absolute inset-0 opacity-10" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.1'/%3E%3C/svg%3E")`
-        }}></div>
-      )}
       
       <div className=" max-w-7xl mx-auto px-2 sm:px-3 lg:px-4 relative z-10">
         {/* Main Footer Content */}
@@ -108,8 +97,8 @@ export default function Footer({
           </div>
           
           {/* Right - Copyright */}
-          <div className="text-xs sm:text-sm text-white/80 text-center sm:text-right">
-            © 2025 Somnium Biolabs. All rights reserved.
+          <div className="text-xs sm:text-sm text-white/80 text-center sm:text-right" suppressHydrationWarning>
+            © {new Date().getFullYear()} Somnium Biolabs. All rights reserved.
           </div>
         </div>
       </div>
