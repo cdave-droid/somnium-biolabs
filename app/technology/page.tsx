@@ -5,9 +5,35 @@ import Footer from '../components/Footer';
 import FooterNav from '../components/FooterNav';
 import Navigation from '../components/Navigation';
 import { LiquidButton } from '../components/ui/liquid-glass-button';
+import { contact, header, intro, sections, type Block } from './content';
+
+// One block of a section: a paragraph, a list with bold lead-ins, or a titled subsection.
+function SectionBlock({ block }: { block: Block }) {
+  if (block.kind === 'list') {
+    return (
+      <ul className="list-disc pl-6 space-y-3 marker:text-gray-400">
+        {block.items.map((item) => (
+          <li key={item.lead} className="text-gray-700 leading-relaxed text-lg">
+            <strong className="font-semibold text-gray-900">{item.lead}</strong> {item.text}
+          </li>
+        ))}
+      </ul>
+    );
+  }
+  if (block.kind === 'subsection') {
+    return (
+      <div className="pt-2">
+        <h4 className="text-xl font-semibold text-gray-900">{block.title}</h4>
+        <p className="mt-1 text-gray-600 italic">{block.tagline}</p>
+        <p className="mt-3 text-gray-700 leading-relaxed text-lg">{block.text}</p>
+      </div>
+    );
+  }
+  return <p className="text-gray-700 leading-relaxed text-lg">{block.text}</p>;
+}
 
 export default function Technology() {
-  const [activeSection, setActiveSection] = useState('unified-patient-twin');
+  const [activeSection, setActiveSection] = useState(sections[0].id);
   const [showBottomBar, setShowBottomBar] = useState(false);
   const [hideBottomBar, setHideBottomBar] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -40,7 +66,7 @@ export default function Technology() {
       
       // Reset to first section when scrolling back up to the top
       if (scrollPosition <= blueSectionHeight) {
-        setActiveSection('unified-patient-twin');
+        setActiveSection(sections[0].id);
         return;
       }
       
@@ -99,14 +125,6 @@ export default function Technology() {
     }
   };
 
-  const sections = [
-    { id: 'unified-patient-twin', title: 'Unified Patient Twin' },
-    { id: 'collaborative-intelligence', title: 'Collaborative Intelligence' },
-    { id: 'simulation-reasoning', title: 'Simulation and Clinical Reasoning' },
-    { id: 'scaling-trust', title: 'Scaling Trust' },
-    { id: 'road-ahead', title: 'The Road Ahead' }
-  ];
-
   return (
     <div className="min-h-screen bg-stone-50">
       {/* Navigation */}
@@ -129,19 +147,18 @@ export default function Technology() {
         }}></div>
         <div className="max-w-4xl mx-auto px-3 sm:px-6 lg:px-8 text-center relative z-10">
           <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold mb-6 mt-20">
-            Inside the Somnium Twin Engine™
+            {header.title}
           </h1>
           <div className="flex flex-wrap justify-center gap-2 sm:gap-4 mb-6">
-            <LiquidButton variant="technology" size="sm">
-            Machine Learning
-            </LiquidButton>
-            <LiquidButton variant="technology" size="sm">
-            Human Physiology
-            </LiquidButton>
+            {header.labels.map((label) => (
+              <LiquidButton key={label} variant="technology" size="sm">
+                {label}
+              </LiquidButton>
+            ))}
           </div>
           <p className="text-base sm:text-lg lg:text-xl text-blue-100 max-w-3xl mx-auto leading-relaxed">
-          Instead of numerous of isolated snapshots, clinicians see a single, evolving portrait: a whole-patient context that supports real-time decision-making.
-            </p>
+            {header.subtitle}
+          </p>
         </div>
       </section>
 
@@ -182,108 +199,47 @@ export default function Technology() {
                 
                 {/* Introduction */}
                 <div className="mb-16">
-                  <p className="text-gray-700 leading-relaxed text-lg mb-8">
-                    Our proprietary Somnium Twin Engine™ represents a paradigm shift on how medicine is practiced. Through the convergence of disruptive technologies, the Twin Engine provides a platform for comprehensive and personalized digital twins, unlocking magnitudes of new research and therapies for patients. The timeline and exorbitant cost required to go from hypothesis generation to bedside clinical benefit is reduced to a fraction, enabling a new generation of healthier patients and more cost-efficient healthcare systems.
-                  </p>
+                  {intro.map((paragraph, index) => (
+                    <p key={index} className={`text-gray-700 leading-relaxed text-lg ${index < intro.length - 1 ? 'mb-6' : 'mb-8'}`}>
+                      {paragraph}
+                    </p>
+                  ))}
                 </div>
 
-                {/* Unified Patient Twin */}
-                <div 
-                  ref={(el) => { sectionsRef.current['unified-patient-twin'] = el; }}
-                  className={`mb-12 transition-all duration-700 ${
-                    visibleSections.has('unified-patient-twin') 
-                      ? 'opacity-100 translate-y-0' 
-                      : 'opacity-0 translate-y-8'
-                  }`}
-                  id="unified-patient-twin"
-                >
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                    Unified Patient Twin
-                  </h3>
-                  <p className="text-gray-700 leading-relaxed text-lg">
-                    STE harmonizes clinical data from monitors, imaging, labs, and records into a real-time digital representation of each patient. It translates these signals into an evolving physiological model that reflects the patient's current and projected states.
-                  </p>
-                </div>
-
-                {/* Collaborative Intelligence */}
-                <div 
-                  ref={(el) => { sectionsRef.current['collaborative-intelligence'] = el; }}
-                  className={`mb-12 transition-all duration-700 ${
-                    visibleSections.has('collaborative-intelligence') 
-                      ? 'opacity-100 translate-y-0' 
-                      : 'opacity-0 translate-y-8'
-                  }`}
-                  id="collaborative-intelligence"
-                >
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                    Collaborative Intelligence
-                  </h3>
-                  <p className="text-gray-700 leading-relaxed text-lg">
-                    Dozens of specialized AI systems — for diagnostics, organ function, treatment planning, and prediction — collaborate through STE's innovative platform. Instead of dozens of isolated snapshots, clinicians see a single, evolving portrait: a whole-patient context that supports real-time decision-making.
-                  </p>
-                </div>
-                
-                {/* Simulation and Clinical Reasoning */}
-                <div 
-                  ref={(el) => { sectionsRef.current['simulation-reasoning'] = el; }}
-                  className={`mb-12 transition-all duration-700 ${
-                    visibleSections.has('simulation-reasoning') 
-                      ? 'opacity-100 translate-y-0' 
-                      : 'opacity-0 translate-y-8'
-                  }`}
-                  id="simulation-reasoning"
-                >
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                    Simulation and Clinical Reasoning
-                  </h3>
-                  <p className="text-gray-700 leading-relaxed text-lg">
-                    Clinicians can explore potential interventions virtually: altering therapy parameters and observing projected responses across organs and time. As real-world data accumulates, STE refines its internal models and continuously improves fidelity and personalization. Through STE, we can scale clinical reasoning from an individual patient level to the hospital level, ultimately leading to the best possible decisions.
-                  </p>
-                </div>
-
-                {/* Scaling Trust */}
-                <div 
-                  ref={(el) => { sectionsRef.current['scaling-trust'] = el; }}
-                  className={`mb-12 transition-all duration-700 ${
-                    visibleSections.has('scaling-trust') 
-                      ? 'opacity-100 translate-y-0' 
-                      : 'opacity-0 translate-y-8'
-                  }`}
-                  id="scaling-trust"
-                >
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                    Scaling Trust
-                  </h3>
-                  <p className="text-gray-700 leading-relaxed text-lg">
-                    STE solves one of the most important aspects of healthcare: trust. STE is designed from the ground up to meet emerging regulatory standards for responsible AI in medicine, and ensure we enhance the trust that exists between patients, healthcare workers, and the hospital systems.
-                  </p>
-              </div>
-
-                {/* The Road Ahead */}
-                <div 
-                  ref={(el) => { sectionsRef.current['road-ahead'] = el; }}
-                  className={`mb-12 transition-all duration-700 ${
-                    visibleSections.has('road-ahead') 
-                      ? 'opacity-100 translate-y-0' 
-                      : 'opacity-0 translate-y-8'
-                  }`}
-                  id="road-ahead"
-                >
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                    The Road Ahead
-              </h3>
-                  <p className="text-gray-700 leading-relaxed text-lg">
-                   Our initial deployments focus on critical care, where decisions are most time-sensitive and data-rich. From there, the Somnium Twin Engine will extend to cardiology, oncology, longevity, and aerospace medicine — building the first universal and wholistic framework for human digital twins.
-                  </p>
-                </div>
+                {/* Sections (each one is an item in the left-hand menu) */}
+                {sections.map((section) => (
+                  <div
+                    key={section.id}
+                    ref={(el) => { sectionsRef.current[section.id] = el; }}
+                    className={`mb-12 transition-all duration-700 ${
+                      visibleSections.has(section.id)
+                        ? 'opacity-100 translate-y-0'
+                        : 'opacity-0 translate-y-8'
+                    }`}
+                    id={section.id}
+                  >
+                    <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                      {section.title}
+                    </h3>
+                    <div className="space-y-6">
+                      {section.blocks.map((block, index) => (
+                        <SectionBlock key={index} block={block} />
+                      ))}
+                    </div>
+                  </div>
+                ))}
 
                 {/* Contact Section */}
                 <div className="bg-gradient-to-r from-stone-100 to-stone-200 rounded-xl p-8 text-center">
                   <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                    Have something to say?
+                    {contact.title}
                   </h3>
-                  <p className="text-gray-700 mb-4">
-                    Email us at <a href="mailto:contact@somniumbio.com" className="text-blue-600 hover:text-blue-700 font-medium">contact@somniumbio.com</a>
+                  <p className="text-gray-700 mb-4 max-w-2xl mx-auto leading-relaxed">
+                    {contact.text}
+                  </p>
+                  <p className="text-gray-700">
+                    {contact.emailLead}{' '}
+                    <a href={`mailto:${contact.email}`} className="text-blue-600 hover:text-blue-700 font-medium">{contact.email}</a>.
                   </p>
                 </div>
               </div>

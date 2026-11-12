@@ -220,7 +220,7 @@ export default function FounderLetter() {
                     We are not building another black box.
                   </p>
                   <p className="text-gray-700 leading-relaxed text-lg">
-                    Somnium Biolabs is built on the values of compassion, growth, and freedom. These values permeate through our actions and our Twin Engine; because without our values aligned, there can be no trust. Trust has been the most sacred aspect of medicine, but we are rapidly losing this due to many factors, which I am sure you can identify. It is our responsibility, as doctors and healthcare workers, to ensure we build systems and solutions that scale trust as much as we scale computation and diagnostic accuracy.
+                    Somnium Biolabs is built on the values of compassion, growth, and freedom. These values permeate through our actions and our technology; because without our values aligned, there can be no trust. Trust has been the most sacred aspect of medicine, but we are rapidly losing this due to many factors, which I am sure you can identify. It is our responsibility, as doctors and healthcare workers, to ensure we build systems and solutions that scale trust as much as we scale computation and diagnostic accuracy.
                   </p>
                 </div>
 
