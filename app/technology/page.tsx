@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react';
 import Footer from '../components/Footer';
 import FooterNav from '../components/FooterNav';
-import Navigation from '../components/Navigation';
 import { LiquidButton } from '../components/ui/liquid-glass-button';
 import { contact, header, intro, sections, type Block } from './content';
 
@@ -127,9 +126,8 @@ export default function Technology() {
 
   return (
     <div className="min-h-screen bg-stone-50">
-      {/* Navigation */}
-      <Navigation />
-      
+      {/* The top menu comes from the site layout (app/layout.tsx), so the page doesn't draw its own. */}
+
       {/* Header Section - Image background with blur */}
       <section className="py-20 text-white relative overflow-hidden">
         {/* Background image */}

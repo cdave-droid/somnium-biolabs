@@ -4,7 +4,6 @@ import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 import Footer from '../components/Footer';
 import FooterNav from '../components/FooterNav';
-import Navigation from '../components/Navigation';
 import { LiquidButton } from '../components/ui/liquid-glass-button';
 import { header, intro, sections, signOff } from './content';
 
@@ -103,9 +102,8 @@ export default function FounderLetter() {
 
   return (
     <div className="min-h-screen bg-stone-50">
-      {/* Navigation */}
-      <Navigation />
-      
+      {/* The top menu comes from the site layout (app/layout.tsx), so the page doesn't draw its own. */}
+
       {/* Header Section - Founder Letter */}
       <section className="py-20 text-white relative overflow-hidden">
         {/* Background image */}
