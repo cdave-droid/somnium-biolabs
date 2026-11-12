@@ -5,9 +5,10 @@ import Footer from '../components/Footer';
 import FooterNav from '../components/FooterNav';
 import Navigation from '../components/Navigation';
 import { LiquidButton } from '../components/ui/liquid-glass-button';
+import { header, intro, sections, signOff } from './content';
 
 export default function FounderLetter() {
-  const [activeSection, setActiveSection] = useState('why-now');
+  const [activeSection, setActiveSection] = useState(sections[0].id);
   const [showBottomBar, setShowBottomBar] = useState(false);
   const [hideBottomBar, setHideBottomBar] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -40,7 +41,7 @@ export default function FounderLetter() {
       
       // Reset to first section when scrolling back up to the top
       if (scrollPosition <= blueSectionHeight) {
-        setActiveSection('why-now');
+        setActiveSection(sections[0].id);
         return;
       }
       
@@ -99,12 +100,6 @@ export default function FounderLetter() {
     }
   };
 
-  const sections = [
-    { id: 'why-now', title: 'Why Now' },
-    { id: 'our-responsibility', title: 'Our Responsibility' },
-    { id: 'the-dream', title: 'The Dream We Serve' }
-  ];
-
   return (
     <div className="min-h-screen bg-stone-50">
       {/* Navigation */}
@@ -127,19 +122,18 @@ export default function FounderLetter() {
         }}></div>
         <div className="max-w-4xl mx-auto px-3 sm:px-6 lg:px-8 text-center relative z-10">
           <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold mb-6 mt-20">
-            Founder Letter
+            {header.title}
           </h1>
           <div className="flex flex-wrap justify-center gap-2 sm:gap-4 mb-6">
-            <LiquidButton variant="founder-letter" size="sm">
-              Company
-            </LiquidButton>
-            <LiquidButton variant="founder-letter" size="sm">
-              Vision
-            </LiquidButton>
+            {header.labels.map((label) => (
+              <LiquidButton key={label} variant="founder-letter" size="sm">
+                {label}
+              </LiquidButton>
+            ))}
           </div>
           <p className="text-base sm:text-lg lg:text-xl text-blue-100 max-w-3xl mx-auto leading-relaxed">
-          Every ICU patient is a physiological mystery to solve
-         </p>
+            {header.subtitle}
+          </p>
         </div>
       </section>
 
@@ -180,86 +174,50 @@ export default function FounderLetter() {
                 
                 {/* Introduction */}
                 <div className="mb-16">
-                  <p className="text-gray-700 leading-relaxed text-lg mb-8">
-                  Digital Twin technologies has been used for years in manufacturing, aerospace, supply chain, and many other fields. Nowadays, no human would step onto a plane without countless safety simulations in place. Medicine deserves the same precision.
-                  </p>
-                </div>
-
-                {/* Why Now */}
-                <div 
-                  ref={(el) => { sectionsRef.current['why-now'] = el; }}
-                  className={`mb-12 transition-all duration-700 ${
-                    visibleSections.has('why-now') 
-                      ? 'opacity-100 translate-y-0' 
-                      : 'opacity-0 translate-y-8'
-                  }`}
-                  id="why-now"
-                >
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                    Why Now
-                  </h3>
-                  <p className="text-gray-700 leading-relaxed text-lg">
-                    The convergence of real-time clinical data, advanced modeling, and powerful AI finally makes this possible. We are at a crucial stage in not just our healthcare system but our civilization. If we can navigate this radical change with the right values, compassion, and shared prosperity, we can build systems of the future that will enable humanity to thrive and reach our destiny of becoming multi-planetary.
-                  </p>
-                </div>
-
-                {/* Our Responsibility */}
-                <div 
-                  ref={(el) => { sectionsRef.current['our-responsibility'] = el; }}
-                  className={`mb-12 transition-all duration-700 ${
-                    visibleSections.has('our-responsibility') 
-                      ? 'opacity-100 translate-y-0' 
-                      : 'opacity-0 translate-y-8'
-                  }`}
-                  id="our-responsibility"
-                >
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                    Our Responsibility
-                  </h3>
-                  <p className="text-gray-700 leading-relaxed text-lg mb-6">
-                    We are not building another black box.
-                  </p>
-                  <p className="text-gray-700 leading-relaxed text-lg">
-                    Somnium Biolabs is built on the values of compassion, growth, and freedom. These values permeate through our actions and our technology; because without our values aligned, there can be no trust. Trust has been the most sacred aspect of medicine, but we are rapidly losing this due to many factors, which I am sure you can identify. It is our responsibility, as doctors and healthcare workers, to ensure we build systems and solutions that scale trust as much as we scale computation and diagnostic accuracy.
-                  </p>
-                </div>
-
-                {/* The Dream We Serve */}
-                <div 
-                  ref={(el) => { sectionsRef.current['the-dream'] = el; }}
-                  className={`mb-12 transition-all duration-700 ${
-                    visibleSections.has('the-dream') 
-                      ? 'opacity-100 translate-y-0' 
-                      : 'opacity-0 translate-y-8'
-                  }`}
-                  id="the-dream"
-                >
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                    The Dream We Serve
-                  </h3>
-                  <p className="text-gray-700 leading-relaxed text-lg mb-6">
-                    "Somnium" means The Dream.
-                  </p>
-                  <p className="text-gray-700 leading-relaxed text-lg mb-6">
-                    It reflects a strong personal belief that you create what you believe. So if I believe in the possibility of a dream-like utopia, and I work hard towards this dream, it will come to fruition. This is what inspired me to start Somnium Biolabs. We are building the lab of the future, one that is not afraid to tackle the impossible dreams of humanity.
-                  </p>
-                  <p className="text-gray-700 leading-relaxed text-lg mb-8">
-                    Next leap in medicine will not come from more data alone, but from creating living models of ourselves — mirrors through which we can safely explore the boundaries of life and consciousness.
-                  </p>
-                  
-                  {/* Quote Section */}
-                  <div className="bg-gray-50 border-l-4 border-gray-600 p-6 my-8">
-                    <blockquote className="text-xl italic text-gray-800 mb-4">
-                      "Beliefs color your world. So why not believe in the biggest dream you possibly can imagine?"
-                    </blockquote>
-                    <p className="text-gray-700 font-semibold">
-                      — Dr. Chintan Dave
+                  {intro.map((paragraph, index) => (
+                    <p key={index} className={`text-gray-700 leading-relaxed text-lg ${index < intro.length - 1 ? 'mb-6' : 'mb-8'}`}>
+                      {paragraph}
                     </p>
-                    <p className="text-gray-600 text-sm">
-                      Founder & CEO, Somnium Biolabs
-                    </p>
+                  ))}
+                </div>
+
+                {/* Sections (each one is an item in the left-hand menu) */}
+                {sections.map((section, sectionIndex) => (
+                  <div
+                    key={section.id}
+                    ref={(el) => { sectionsRef.current[section.id] = el; }}
+                    className={`mb-12 transition-all duration-700 ${
+                      visibleSections.has(section.id)
+                        ? 'opacity-100 translate-y-0'
+                        : 'opacity-0 translate-y-8'
+                    }`}
+                    id={section.id}
+                  >
+                    <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                      {section.title}
+                    </h3>
+                    {section.paragraphs.map((paragraph, index) => (
+                      <p key={index} className={`text-gray-700 leading-relaxed text-lg ${index < section.paragraphs.length - 1 ? 'mb-6' : ''}`}>
+                        {paragraph}
+                      </p>
+                    ))}
+
+                    {/* Quote Section: closes the letter */}
+                    {sectionIndex === sections.length - 1 && (
+                      <div className="bg-gray-50 border-l-4 border-gray-600 p-6 my-8">
+                        <blockquote className="text-xl italic text-gray-800 mb-4">
+                          “{signOff.quote}”
+                        </blockquote>
+                        <p className="text-gray-700 font-semibold">
+                          — {signOff.name}
+                        </p>
+                        <p className="text-gray-600 text-sm">
+                          {signOff.role}
+                        </p>
+                      </div>
+                    )}
                   </div>
-                </div>
+                ))}
 
             </div>
           </div>
