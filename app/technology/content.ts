@@ -5,7 +5,8 @@
 export type Block =
   | { kind: 'paragraph'; text: string }
   | { kind: 'list'; items: { lead: string; text: string }[] }
-  | { kind: 'subsection'; title: string; tagline: string; text: string };
+  | { kind: 'subsection'; title: string; tagline: string; text: string }
+  | { kind: 'link'; text: string; href: string; after: string };
 
 export type Section = { id: string; title: string; blocks: Block[] };
 

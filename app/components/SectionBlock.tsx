@@ -22,5 +22,12 @@ export default function SectionBlock({ block }: { block: Block }) {
       </div>
     );
   }
+  if (block.kind === 'link') {
+    return (
+      <p className="text-gray-700 leading-relaxed text-lg">
+        <a href={block.href} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-700 font-medium underline underline-offset-4">{block.text}</a>{block.after}
+      </p>
+    );
+  }
   return <p className="text-gray-700 leading-relaxed text-lg">{block.text}</p>;
 }
