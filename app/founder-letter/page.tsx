@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 import Footer from '../components/Footer';
 import FooterNav from '../components/FooterNav';
@@ -208,12 +209,44 @@ export default function FounderLetter() {
                         <blockquote className="text-xl italic text-gray-800 mb-4">
                           “{signOff.quote}”
                         </blockquote>
-                        <p className="text-gray-700 font-semibold">
-                          — {signOff.name}
-                        </p>
-                        <p className="text-gray-600 text-sm">
-                          {signOff.role}
-                        </p>
+                        <div className="flex items-end justify-between gap-6">
+                          <div>
+                            <p className="text-gray-700 font-semibold">
+                              — {signOff.name}
+                            </p>
+                            <p className="text-gray-600 text-sm">
+                              {signOff.role}
+                            </p>
+                          </div>
+                          {/* Photo in a circle outline, with the Instagram handle underneath; both link to Instagram */}
+                          <a
+                            href={signOff.instagram}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label={`${signOff.name} on Instagram, @${signOff.handle}`}
+                            className="group flex shrink-0 flex-col items-center"
+                          >
+                            <span className="block rounded-full p-1 ring-2 ring-gray-300 transition-colors duration-200 group-hover:ring-gray-500">
+                              <span className="block h-20 w-20 sm:h-28 sm:w-28 overflow-hidden rounded-full">
+                                <Image
+                                  src={signOff.photo}
+                                  alt={signOff.name}
+                                  width={224}
+                                  height={224}
+                                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                                />
+                              </span>
+                            </span>
+                            <span className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-gray-700 underline-offset-4 group-hover:text-gray-900 group-hover:underline">
+                              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                                <rect x="3" y="3" width="18" height="18" rx="5" />
+                                <circle cx="12" cy="12" r="4" />
+                                <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+                              </svg>
+                              @{signOff.handle}
+                            </span>
+                          </a>
+                        </div>
                       </div>
                     )}
                   </div>
