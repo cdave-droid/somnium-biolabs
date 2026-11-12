@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Footer from '../components/Footer';
-import SectionBlock from '../components/SectionBlock';
+import SectionBlock, { Rich } from '../components/SectionBlock';
 import { contact, header, intro, sections } from './content';
 
 export default function Media() {
@@ -156,7 +156,7 @@ export default function Media() {
                 <div className="mb-16">
                   {intro.map((paragraph, index) => (
                     <p key={index} className={`text-gray-700 leading-relaxed text-lg ${index < intro.length - 1 ? 'mb-6' : 'mb-8'}`}>
-                      {paragraph}
+                      <Rich text={paragraph} />
                     </p>
                   ))}
                 </div>

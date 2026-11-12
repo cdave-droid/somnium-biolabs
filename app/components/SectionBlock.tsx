@@ -1,7 +1,7 @@
 import type { Block } from '../technology/content';
 
 // Words wrapped in **double asterisks** in the copy files show in bold.
-function Rich({ text }: { text: string }) {
+export function Rich({ text }: { text: string }) {
   return (
     <>
       {text.split(/(\*\*[^*]+\*\*)/).map((part, i) =>
