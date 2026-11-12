@@ -12,7 +12,7 @@ export const header = {
 export const intro = [
   'Frontier Medicine is the study of human physiology under extreme environments, and of the technology required to keep a person alive in them. It runs from the intensive care unit to the edge of space. When studying extreme physiology, our traditional medical and AI approaches break down; and Frontier Medicine is the study and control of this extreme physiology.',
   'The second aim of Frontier Medicine is to inspire people to work on futuristic and science fiction medical problems. With AI making most research and technology rapidly achievable, the main question becomes: what is actually worth building?',
-  'Frontier Medicine exists to provide infrastructure for inspired humans who want to solve big medical problems together. We are mainly a media production studio (160,000 followers across social media) that turns the hardest problems in physiology into stories and educational content, and a research program that allows inspired humans to work together.',
+  'Frontier Medicine exists to provide infrastructure for inspired humans who want to solve big medical problems together. We are mainly a media production studio (**160,000 followers across social media**) that turns the hardest problems in physiology into stories and educational content, and a research program that allows inspired humans to work together.',
 ];
 
 export const sections: Section[] = [
@@ -33,7 +33,7 @@ export const sections: Section[] = [
     blocks: [
       {
         kind: 'paragraph',
-        text: 'Applications open in January 2027 for the first cohort of Hibernation Fellows: **16 fellows**, working in 4 teams, on human hibernation research. Over the six-month program, fellows will work together on the frontier medical problems that stand between today’s science and human hibernation, with the chance to win a **$15,000 USD** prize.',
+        text: 'Applications open in January 2027 for the first cohort of Hibernation Fellows: **16 fellows**, working in 4 teams, on human hibernation research. Over the six-month program, fellows will work together on the frontier medical problems that stand between today’s science and human hibernation, with the chance to win a **$15,000 USD prize.**',
       },
       {
         kind: 'link',
