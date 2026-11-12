@@ -1,0 +1,16 @@
+# Somnium Biolabs
+
+> Somnium Biolabs is developing PhysioBridge™, a cardiovascular digital twin that combines computational physiology with AI to understand and predict how each person's heart and circulation respond, from the ICU to remote care and human spaceflight. Founded by ICU physician Chintan Dave, MD, who also founded Frontier Medicine.
+
+Contact: contact@somniumbio.com
+
+## Pages
+
+- [Home](https://www.somniumbio.com/): why medical AI trained on large datasets fails at the edge of medicine (the ICU, remote care, the military, space), and Somnium's approach: computational models of physiology personalized with AI, for precision physiology and state prediction.
+- [PhysioBridge™](https://www.somniumbio.com/technology): the cardiovascular digital twin; its aims (understand, predict, anticipate), its settings (space exploration, military and aerospace, rural and remote care, chronic disease and home monitoring), and research and validation.
+- [Frontier Medicine](https://www.somniumbio.com/media): the study and control of human physiology under extreme environments; Season 1 on human hibernation, organ by organ; the Hibernation Fellows program (applications open January 2027: 16 fellows in 4 teams, six months, a $15,000 USD prize).
+- [Founder Letter](https://www.somniumbio.com/founder-letter): why Chintan Dave, MD, founded Somnium Biolabs, from reactive critical care to predicting physiology, and the long-term goal of human hibernation.
+
+## Topics
+
+Cardiovascular digital twins; cardiovascular monitoring and intelligence; computational physiology; space medicine; human spaceflight physiology; critical care medicine; human hibernation and torpor; extreme physiology.

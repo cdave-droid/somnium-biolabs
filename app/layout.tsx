@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Exo_2 } from "next/font/google";
 import "./globals.css";
 import Navigation from "./components/Navigation";
+import StructuredData from "./components/StructuredData";
+import { SITE_URL, pages, site } from "./site";
 
 const exo2 = Exo_2({
   subsets: ['latin'],
@@ -10,8 +12,13 @@ const exo2 = Exo_2({
 });
 
 export const metadata: Metadata = {
-  title: "Somnium Biolabs",
-  description: "Somnium Biolabs builds personal physiological twins that look ahead: for crews on the Moon and Mars, and for patients in critical care.",
+  metadataBase: new URL(SITE_URL),
+  title: { default: pages.home.title, template: '%s | Somnium Biolabs' },
+  description: pages.home.description,
+  applicationName: site.name,
+  alternates: { canonical: '/' },
+  openGraph: { type: 'website', siteName: site.name, title: pages.home.title, description: pages.home.description, url: '/' },
+  twitter: { card: 'summary', title: pages.home.title, description: pages.home.description },
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' }
@@ -28,6 +35,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={exo2.variable}>
       <body className={`${exo2.className} antialiased`}>
+        <StructuredData />
         <Navigation />
         <main>
           {children}
