@@ -124,7 +124,6 @@ export const sections: Section[] = [
 
 export const contact = {
   title: 'Partner with Somnium',
-  text: 'We welcome new collaborations with research institutions, healthcare innovators, aerospace organizations and defense partners to advance cardiovascular digital twins and bring them into real-world use.',
   emailLead: 'To explore a research collaboration or technology partnership, email',
   email: 'contact@somniumbio.com',
 };

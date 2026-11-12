@@ -232,9 +232,6 @@ export default function Technology() {
                   <h3 className="text-xl font-semibold text-gray-900 mb-4">
                     {contact.title}
                   </h3>
-                  <p className="text-gray-700 mb-4 max-w-2xl mx-auto leading-relaxed">
-                    {contact.text}
-                  </p>
                   <p className="text-gray-700">
                     {contact.emailLead}{' '}
                     <a href={`mailto:${contact.email}`} className="text-blue-600 hover:text-blue-700 font-medium">{contact.email}</a>.
