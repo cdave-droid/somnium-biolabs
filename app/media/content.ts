@@ -33,7 +33,7 @@ export const sections: Section[] = [
     blocks: [
       {
         kind: 'paragraph',
-        text: 'Applications open in January 2027 for the first cohort of Hibernation Fellows: 16 fellows, working in 4 teams, on human hibernation research. Over the six-month program, fellows will work together on the frontier medical problems that stand between today’s science and human hibernation, with the chance to win a $15,000 USD prize.',
+        text: 'Applications open in January 2027 for the first cohort of Hibernation Fellows: **16 fellows**, working in 4 teams, on human hibernation research. Over the six-month program, fellows will work together on the frontier medical problems that stand between today’s science and human hibernation, with the chance to win a **$15,000 USD** prize.',
       },
       {
         kind: 'link',
