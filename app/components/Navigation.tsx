@@ -16,6 +16,7 @@ const Navigation = () => {
   const navItems = [
     // { name: 'White Paper I', href: '/white-paper' },
     { name: 'Technology', href: '/technology' },
+    { name: 'Media', href: '/media' },
     { name: 'Founder Letter', href: '/founder-letter' },
   ];
 

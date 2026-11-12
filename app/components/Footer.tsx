@@ -5,7 +5,7 @@ interface FooterProps {
   previousText?: string;
   nextHref?: string;
   nextText?: string;
-  variant?: 'white-paper' | 'problem-statement' | 'technology' | 'founder-letter' | 'default' | 'home';
+  variant?: 'white-paper' | 'problem-statement' | 'technology' | 'founder-letter' | 'media' | 'default' | 'home';
 }
 
 export default function Footer({ 
@@ -27,6 +27,8 @@ export default function Footer({
         return '';
       case 'home':
         return '';
+      case 'media':
+        return 'bg-[#040809]';
       default:
         return 'bg-gradient-to-b from-blue-600 via-blue-500 to-blue-400';
     }
